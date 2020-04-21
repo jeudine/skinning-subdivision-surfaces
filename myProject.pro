@@ -36,7 +36,7 @@ EXT_DIR = extern
 
 LIBS += -lglut \
     -lGLU
-LIBS += -lgsl \
+LIBS += -lgsl -lgslcblas \
     -lgomp
 LIBS += -lblas \
     -lgomp
