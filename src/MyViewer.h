@@ -171,6 +171,8 @@ public :
                 }
             }
         }
+        else if (event->key() == Qt::Key_S)
+            mesh.subdivide();
     }
 
     void mouseDoubleClickEvent( QMouseEvent * e )

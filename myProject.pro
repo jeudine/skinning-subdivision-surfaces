@@ -17,7 +17,8 @@ HEADERS += ./src/point3.h \
     ./src/gl/BasicColors.h
 SOURCES += ./src/main.cpp \
     ./src/gl/GLUtilityMethods.cpp\
-    ./src/gl/BasicColors.cpp
+    ./src/gl/BasicColors.cpp\
+    ./src/Mesh.cpp
 
 
 
