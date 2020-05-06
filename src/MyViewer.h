@@ -173,6 +173,8 @@ public :
         }
         else if (event->key() == Qt::Key_S)
             mesh.subdivide();
+        else if (event->key() == Qt::Key_R)
+            mesh.redisplay();
     }
 
     void mouseDoubleClickEvent( QMouseEvent * e )
@@ -217,6 +219,7 @@ public slots:
             else if(fileName.endsWith(QString(".obj")))
                 success = OBJIO::openTriMesh(fileName.toStdString() , mesh.vertices , mesh.triangles );
             if(success) {
+                mesh.basicVertices = mesh.vertices;
                 std::cout << fileName.toStdString() << " was opened successfully" << std::endl;
                 point3d bb(FLT_MAX,FLT_MAX,FLT_MAX) , BB(-FLT_MAX,-FLT_MAX,-FLT_MAX);
                 for( unsigned int v = 0 ; v < mesh.vertices.size() ; ++v ) {

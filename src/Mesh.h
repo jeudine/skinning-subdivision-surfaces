@@ -3,8 +3,7 @@
 
 #include <vector>
 #include "point3.h"
-
-
+#include <map>
 
 struct Vertex{
     point3d p;
@@ -29,11 +28,7 @@ Vertex operator * (const float s, const Vertex & v);
 struct Triangle{
     unsigned int corners[3];
     Triangle () {}
-    Triangle(unsigned int x , unsigned int y , unsigned int z) {
-        corners[0] = x;
-        corners[1] = y;
-        corners[2] = z;
-    }
+    Triangle(unsigned int x , unsigned int y , unsigned int z) : corners{x, y, z} {}
     unsigned int & operator [] (unsigned int c) { return corners[c]; }
     unsigned int operator [] (unsigned int c) const { return corners[c]; }
     unsigned int size() const { return 3 ; }
@@ -43,18 +38,29 @@ class Uvec2{
     private:
         unsigned int corners[2];
     public:
-        Uvec2(unsigned int x, unsigned int y) {corners[0] = x; corners[1] = y;}
+        Uvec2(unsigned int x, unsigned int y) : corners{x, y} {}
         unsigned int & operator [] (unsigned int c) { return corners[c]; }
         unsigned int operator [] (unsigned int c) const { return corners[c]; }
         unsigned int size() const { return 2 ; }
         bool operator == (const Uvec2 & v) { return (corners[0] == v[0]) && (corners[1] == v[1]);}
 };
 
-class Mesh{
-    public:
-        std::vector< Vertex > vertices;
-        std::vector< Triangle > triangles;
-        void subdivide();
+struct coeff{
+    unsigned int vertex;
+    float lambda;
+    coeff(unsigned int _vertex = 0, float _lambda = 0): vertex(_vertex), lambda(_lambda) {}
+};
+
+struct Mesh{
+    std::vector< Vertex > vertices;
+    std::vector< Vertex > basicVertices;
+    std::vector< Triangle > triangles;
+    std::vector< std::map< unsigned int, float > > coeffs;
+    std::vector< std::map< unsigned int, float > > newCoeffs;
+    void subdivide();
+    void addCoeff(unsigned int vertex, coeff k);
+    void addNewCoeff(unsigned int vertex, coeff k);
+    void redisplay();
 };
 
 
