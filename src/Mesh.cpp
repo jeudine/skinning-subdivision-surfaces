@@ -208,3 +208,11 @@ void Mesh::redisplay() {
         vertices[i] = tmp;
     }
 }
+
+void Mesh::basicDisplay() {
+    vertices = basicVertices;
+    triangles = basicTriangles;
+    coeffs.resize(basicVertices.size());
+    for(unsigned int i = 0; i<basicVertices.size(); i++)
+        coeffs[i][i] = 1;
+}

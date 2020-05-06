@@ -175,6 +175,8 @@ public :
             mesh.subdivide();
         else if (event->key() == Qt::Key_R)
             mesh.redisplay();
+        else if (event->key() == Qt::Key_B)
+            mesh.basicDisplay();
     }
 
     void mouseDoubleClickEvent( QMouseEvent * e )
@@ -220,6 +222,7 @@ public slots:
                 success = OBJIO::openTriMesh(fileName.toStdString() , mesh.vertices , mesh.triangles );
             if(success) {
                 mesh.basicVertices = mesh.vertices;
+                mesh.basicTriangles = mesh.triangles;
                 mesh.coeffs.resize(mesh.vertices.size());
                 for(unsigned int i = 0; i<mesh.vertices.size(); i++)
                     mesh.coeffs[i][i] = 1;
