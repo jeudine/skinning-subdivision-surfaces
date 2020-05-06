@@ -185,24 +185,15 @@ void Mesh::subdivide() {
 }
 
 void Mesh::addNewCoeff(unsigned int vertex, coeff k) {
-    if(k.vertex < this->basicVertices.size()) {
-        newCoeffs[vertex][k.vertex] += k.lambda;
-        //k.vertex peut s'exprimer en fonction de plusieurs vertices
-        return;
-    }
     for(auto const & it : coeffs[k.vertex]) {
-        addNewCoeff(vertex, {it.first, it.second * k.lambda});
+        newCoeffs[vertex][it.first] += it.second * k.lambda;
     }
 }
 
 
 void Mesh::addCoeff(unsigned int vertex, coeff k) {
-    if(k.vertex < this->basicVertices.size()) {
-        coeffs[vertex][k.vertex] += k.lambda;
-        return;
-    }
     for(auto const & it : coeffs[k.vertex]) {
-        addCoeff(vertex, {it.first, it.second * k.lambda});
+        coeffs[vertex][it.first] += it.second * k.lambda;
     }
 }
 
