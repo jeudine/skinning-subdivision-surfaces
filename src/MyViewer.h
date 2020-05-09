@@ -11,7 +11,7 @@
 #define GL_GLEXT_PROTOTYPES
 #include <gl/openglincludeQtComp.h>
 #include <GL/glext.h>
-#include <QOpenGLFunctions_4_3_Core>
+#include <QOpenGLFunctions_3_0>
 #include <QOpenGLFunctions>
 #include <QGLViewer/qglviewer.h>
 
@@ -30,7 +30,7 @@
 #include "qt/QSmartAction.h"
 
 
-class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
+class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
 {
     Q_OBJECT
 
@@ -40,7 +40,7 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
 
 public :
 
-    MyViewer(QGLWidget * parent = NULL) : QGLViewer(parent) , QOpenGLFunctions_4_3_Core() {
+    MyViewer(QGLWidget * parent = NULL) : QGLViewer(parent) , QOpenGLFunctions_3_0() {
     }
 
 
@@ -133,13 +133,20 @@ public :
     }
 
     QString helpString() const {
-        QString text("<h2>Our cool project</h2>");
+        QString text("<h2>Skinning Subdivision Surfaces</h2>");
         text += "<p>";
-        text += "This is a research application, it can explode.";
+        text += "This is a research application, it can explode. "
+                "This project aims to optimize in real time the deformations of control points "
+                "in order to obtain a smooth and intuitively animated subdivision surface.";
+        text += "<h3>Supervisor</h3>";
+        text += "<ul>";
+        text += "<li>Jean-Marc THIERY</li>";
+        text += "</ul>";
         text += "<h3>Participants</h3>";
         text += "<ul>";
-        text += "<li>jmt</li>";
-        text += "<li>...</li>";
+        text += "<li>Mickael CORROYER</li>";
+        text += "<li>Guillaume DELEPOULLE</li>";
+        text += "<li>Julien EUDINE</li>";
         text += "</ul>";
         text += "<h3>Basics</h3>";
         text += "<p>";
@@ -147,6 +154,9 @@ public :
         text += "<li>H   :   make this help appear</li>";
         text += "<li>Ctrl + mouse right button double click   :   choose background color</li>";
         text += "<li>Ctrl + T   :   change window title</li>";
+        text += "<li>S   :   Subdivide the mesh with the Loop subdivision</li>";
+        text += "<li>R   :   Redisplay the shape using the control points weights and the control points</li>";
+        text += "<li>B   :   Display the basic mesh</li>";
         text += "</ul>";
         return text;
     }

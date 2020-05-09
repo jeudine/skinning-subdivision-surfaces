@@ -4,8 +4,7 @@ DEPENDPATH += .
 INCLUDEPATH += .
 INCLUDEPATH += ./src
 QT += opengl xml
-CONFIG += qt \
-    release
+CONFIG += qt release c++11
 MOC_DIR = ./tmp/moc
 OBJECTS_DIR = ./tmp/obj
 

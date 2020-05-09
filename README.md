@@ -1,5 +1,7 @@
 # skinning-subdivision-surfaces
-WIP
+Research application aiming to optimize in real time the deformations of control points 
+in order to obtain a smooth and intuitively animated subdivision surface.
+
 
 ## Installation
 You need to install [QT](https://www.qt.io/) (>= 5.5).
