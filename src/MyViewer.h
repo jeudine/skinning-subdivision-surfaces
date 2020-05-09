@@ -11,11 +11,12 @@
 #define GL_GLEXT_PROTOTYPES
 #include <gl/openglincludeQtComp.h>
 #include <GL/glext.h>
-#include <QOpenGLFunctions_4_3_Core>
+#include <QOpenGLFunctions_3_0>
 #include <QOpenGLFunctions>
 #include <QGLViewer/qglviewer.h>
 
 #include <gl/GLUtilityMethods.h>
+#include <QGLViewer/vec.h>
 
 // Qt stuff:
 #include <QFormLayout>
@@ -27,10 +28,12 @@
 #include <QLineEdit>
 
 
+
 #include "qt/QSmartAction.h"
+#include <QGLViewer/manipulatedFrame.h>
 
 
-class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
+class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
 {
     Q_OBJECT
 
@@ -40,7 +43,7 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
 
 public :
 
-    MyViewer(QGLWidget * parent = NULL) : QGLViewer(parent) , QOpenGLFunctions_4_3_Core() {
+    MyViewer(QGLWidget * parent = NULL) : QGLViewer(parent) , QOpenGLFunctions_3_0() {
     }
 
 
@@ -80,6 +83,20 @@ public :
             glVertex3f(p1[0],p1[1],p1[2]);
             glVertex3f(p2[0],p2[1],p2[2]);
         }
+        drawAxis();
+        glPushMatrix();
+        glMultMatrixd(manipulatedFrame()->matrix());
+
+        qglviewer::Vec position = manipulatedFrame()->position();
+        qglviewer::Quaternion orientation = manipulatedFrame()->orientation();
+        // Depuis la classe quaterion on peut recuperer une rotation matrix avec getRotationMatrix(qreal m[3][3]) const
+
+        std::cout << "Orientation du frame: "<< orientation << std::endl;
+        std::cout << "Postion du frame: " << position << std::endl;
+        glScalef(0.3f, 0.3f, 0.3f);
+        drawAxis();
+        glPopMatrix();
+
         glEnd();
     }
 
@@ -127,6 +144,10 @@ public :
         glEnable(GL_COLOR_MATERIAL);
 
         //
+
+        setManipulatedFrame(new qglviewer::ManipulatedFrame());
+
+
         setSceneCenter( qglviewer::Vec( 0 , 0 , 0 ) );
         setSceneRadius( 10.f );
         showEntireScene();
