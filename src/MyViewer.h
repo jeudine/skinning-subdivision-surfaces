@@ -229,6 +229,12 @@ public :
 
     void mousePressEvent(QMouseEvent* e ) {
         QGLViewer::mousePressEvent(e);
+        bool found;
+        if( (e->modifiers() & Qt::ControlModifier)  &&  (e->button() == Qt::LeftButton) )
+        {
+            manipulatedFrame()->setPosition(camera()->pointUnderPixel(e->pos(), found));
+            return;
+        }
     }
 
     void mouseMoveEvent(QMouseEvent* e  ){
