@@ -31,18 +31,18 @@
 
 #include "qt/QSmartAction.h"
 #include <QGLViewer/manipulatedFrame.h>
-
+#include "gizmo.h"
 
 class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
 {
     Q_OBJECT
 
     Mesh mesh;
-
+    Gizmo gizmo;
     QWidget * controls;
 
-public :
 
+public :
     MyViewer(QGLWidget * parent = NULL) : QGLViewer(parent) , QOpenGLFunctions_3_0() {
     }
 
@@ -90,9 +90,11 @@ public :
         qglviewer::Vec position = manipulatedFrame()->position();
         qglviewer::Quaternion orientation = manipulatedFrame()->orientation();
         // Depuis la classe quaterion on peut recuperer une rotation matrix avec getRotationMatrix(qreal m[3][3]) const
-
+        qreal rotationMatrix[3][3];
+        orientation.getRotationMatrix(rotationMatrix);
         std::cout << "Orientation du frame: "<< orientation << std::endl;
         std::cout << "Postion du frame: " << position << std::endl;
+        gizmo.setTransfoMatrix(position, rotationMatrix);
         glScalef(0.3f, 0.3f, 0.3f);
         drawAxis();
         glPopMatrix();
@@ -208,6 +210,7 @@ public :
             mesh.redisplay();
         else if (event->key() == Qt::Key_B)
             mesh.basicDisplay();
+
     }
 
     void mouseDoubleClickEvent( QMouseEvent * e )
@@ -230,9 +233,11 @@ public :
     void mousePressEvent(QMouseEvent* e ) {
         QGLViewer::mousePressEvent(e);
         bool found;
-        if( (e->modifiers() & Qt::ControlModifier)  &&  (e->button() == Qt::LeftButton) )
+        if( (e->modifiers() & Qt::AltModifier)  &&  (e->button() == Qt::LeftButton) )
         {
-            manipulatedFrame()->setPosition(camera()->pointUnderPixel(e->pos(), found));
+            qglviewer::Vec point = camera()->pointUnderPixel(e->pos(), found);
+            manipulatedFrame()->setPosition(point);
+            gizmo.setOrigin(point);
             return;
         }
     }
