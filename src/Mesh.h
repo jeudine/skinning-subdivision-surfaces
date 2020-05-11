@@ -8,7 +8,7 @@
 struct Vertex{
     point3d p;
     Vertex() {}
-    Vertex(double x , double y , double z) : p(x,y,z) {}
+    Vertex(float x , float y , float z) : p(x,y,z) {}
     double & operator [] (unsigned int c) { return p[c]; }
     double operator [] (unsigned int c) const { return p[c]; }
     Vertex operator + (const Vertex & v) { return Vertex(
@@ -53,6 +53,25 @@ struct coeff{
     coeff(unsigned int _vertex = 0, float _lambda = 0): vertex(_vertex), lambda(_lambda) {}
 };
 
+struct GausCoeff {
+    float a;
+    float c;
+    Vertex pos;
+    GausCoeff(float _a = 1, float _c = 1, Vertex _pos = {0,0,0}) : a(_a), c(_c), pos(_pos) {}
+};
+
+struct Transformation {
+    float T[4][4];
+    GausCoeff gcoeff;
+    Transformation(float _T[4][4] ,float _a = 1, float _c = 1, Vertex _pos ={0, 0, 0}) : gcoeff(_a, _c, _pos)
+    {
+        for(int i = 0; i<4; i++)
+            for (int j = 0; j<4; j++)
+                T[i][j] = _T[i][j];
+    }
+
+};
+
 struct Mesh{
     std::vector< Vertex > vertices;
     std::vector< Vertex > basicVertices;
@@ -65,5 +84,6 @@ struct Mesh{
     void addNewCoeff(unsigned int vertex, coeff k);
     void redisplay();
     void basicDisplay();
+    void transform(const Transformation & t);
 };
 #endif // PROJECTMESH_H

@@ -8,6 +8,8 @@ You need to install [QT](https://www.qt.io/) (>= 5.5).
 
 You will also need an implementation of [OpenGL](https://www.opengl.org/) (>= 3.0)
 
+Please also install [eigen3](https://eigen.tuxfamily.org/index.php?title=Main_Page)
+
 Don't forget to build `libQGLViewer` in the extern directory.
 
 ## Usage

@@ -1,4 +1,5 @@
 #include "Mesh.h"
+#include <eigen3/Eigen/Dense>
 
 using namespace std;
 
@@ -212,4 +213,8 @@ void Mesh::basicDisplay() {
     coeffs.resize(basicVertices.size());
     for(unsigned int i = 0; i<basicVertices.size(); i++)
         coeffs[i][i] = 1.f;
+}
+
+
+void Mesh::transform(const Transformation & t) {
 }
