@@ -20,10 +20,12 @@ struct Vertex{
             p[0]+=v[0],
             p[1]+=v[1],
             p[2]+=v[2]);}
+    friend Vertex operator * (const float s, const Vertex & v) {
+        return Vertex(v[0]*s, v[1]*s, v[2]*s);
+    }
 
 };
 
-Vertex operator * (const float s, const Vertex & v);
 
 struct Triangle{
     unsigned int corners[3];
@@ -64,7 +66,4 @@ struct Mesh{
     void redisplay();
     void basicDisplay();
 };
-
-
-
 #endif // PROJECTMESH_H

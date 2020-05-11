@@ -2,10 +2,6 @@
 
 using namespace std;
 
-Vertex operator * (const float s, const Vertex & v) {
-    return Vertex(v[0]*s, v[1]*s, v[2]*s);
-}
-
 void Mesh::subdivide() {
     //split
 
@@ -198,7 +194,7 @@ void Mesh::addCoeff(unsigned int vertex, coeff k) {
 }
 
 void Mesh::redisplay() {
-    unsigned int n = vertices.size();
+    unsigned int n = coeffs.size();
     Vertex tmp;
     for(unsigned int i = 0; i < n; i++) {
         tmp = {0, 0, 0};
@@ -212,7 +208,8 @@ void Mesh::redisplay() {
 void Mesh::basicDisplay() {
     vertices = basicVertices;
     triangles = basicTriangles;
+    coeffs.clear();
     coeffs.resize(basicVertices.size());
     for(unsigned int i = 0; i<basicVertices.size(); i++)
-        coeffs[i][i] = 1;
+        coeffs[i][i] = 1.f;
 }
