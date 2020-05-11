@@ -78,10 +78,7 @@ struct Mesh{
     std::vector< Triangle > triangles;
     std::vector< Triangle > basicTriangles;
     std::vector< std::map< unsigned int, float > > coeffs;
-    std::vector< std::map< unsigned int, float > > newCoeffs;
     void subdivide();
-    void addCoeff(unsigned int vertex, coeff k);
-    void addNewCoeff(unsigned int vertex, coeff k);
     void redisplay();
     void basicDisplay();
     void transform(const Transformation & t);

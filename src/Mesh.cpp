@@ -1,17 +1,18 @@
 #include "Mesh.h"
 #include <eigen3/Eigen/Dense>
+#include <set>
 
 using namespace std;
 
 void Mesh::subdivide() {
-    //split
 
     vector<Triangle> new_triangleIndices;
-    vector<Uvec2> neighbours; //to know if the odd_vertex already exists
+    vector<Uvec2> neighbours; //to know if the odd vertex already exists
+    vector<Uvec2> neighbour_triangles; // to move odd vertices
+    vector<set <unsigned int> > neighbour_vertices; //to move even vertices
 
-    vector<Uvec2> neighbour_triangles;// to move odd_vertices
 
-    map<unsigned int, vector <unsigned int>> odd_n;
+    map<unsigned int, vector <unsigned int>> even_n;
     vector <Uvec2>::iterator it;
     int counter = vertices.size();
     int len_vertices = counter;
@@ -19,11 +20,9 @@ void Mesh::subdivide() {
     Triangle new_triangle;
 
     int triangle_count = 0;
+    neighbour_vertices.resize(len_vertices);
 
-
-    auto create_odd_vertices=[&](unsigned int & odd_vertex, unsigned int even_vertex1, unsigned int even_vertex2) -> void {
-
-
+    auto create_odd_vertex=[&](unsigned int & odd_vertex, unsigned int even_vertex1, unsigned int even_vertex2) -> void {
         unsigned int tmp;
         if(even_vertex1 > even_vertex2) {
             tmp = even_vertex1;
@@ -35,8 +34,6 @@ void Mesh::subdivide() {
 
         if(it == neighbours.end()) {
             odd_vertex = counter;
-            odd_n[even_vertex1].push_back(counter - vertices.size());
-            odd_n[even_vertex2].push_back(counter - vertices.size());
             counter ++;
             neighbour_triangles.push_back(Uvec2(triangle_count, numeric_limits<unsigned int>::infinity()));
             neighbours.push_back(Uvec2(even_vertex1, even_vertex2));
@@ -44,16 +41,20 @@ void Mesh::subdivide() {
             neighbour_triangles[std::distance(neighbours.begin(), it)][1] = triangle_count;
             odd_vertex = std::distance(neighbours.begin(), it) + vertices.size();
         }
-
-
     };
 
     for(const Triangle & triangle : triangles) {
 
-        create_odd_vertices(new_triangle[0], triangle[0], triangle[1]);
-        create_odd_vertices(new_triangle[1], triangle[1], triangle[2]);
-        create_odd_vertices(new_triangle[2], triangle[2], triangle[0]);
+        create_odd_vertex(new_triangle[0], triangle[0], triangle[1]);
+        create_odd_vertex(new_triangle[1], triangle[1], triangle[2]);
+        create_odd_vertex(new_triangle[2], triangle[2], triangle[0]);
 
+        neighbour_vertices[triangle[0]].insert(triangle[1]);
+        neighbour_vertices[triangle[0]].insert(triangle[2]);
+        neighbour_vertices[triangle[1]].insert(triangle[2]);
+        neighbour_vertices[triangle[1]].insert(triangle[0]);
+        neighbour_vertices[triangle[2]].insert(triangle[0]);
+        neighbour_vertices[triangle[2]].insert(triangle[1]);
 
         new_triangleIndices.push_back(new_triangle);
         new_triangleIndices.push_back(Triangle(triangle[0], new_triangle[0], new_triangle[2]));
@@ -64,8 +65,18 @@ void Mesh::subdivide() {
     }
 
 
-    //move odd
+    // move
+    std::vector< std::map< unsigned int, float > > old_coeffs = coeffs;
+    coeffs.clear();
     coeffs.resize(counter);
+
+    auto addCoeff=[&](unsigned int vertex, coeff k) -> void {
+        for(auto const & it : old_coeffs[k.vertex]) {
+            coeffs[vertex][it.first] += it.second * k.lambda;
+        }
+    };
+
+    //move odd
     vector<Vertex> odd_vertexPositions;
     unsigned int len = counter - len_vertices;
     unsigned int triangle1[3];
@@ -135,63 +146,47 @@ void Mesh::subdivide() {
 
     }
 
-    newCoeffs.clear();
-    newCoeffs.resize(len_vertices);
     // move even
     int n;
     Vertex res;
-    len = vertices.size();
     float alphan = 3.f/8.f;
     float alpha3 = 3.f/16.f;
-    for (unsigned int i = 0; i<len ; i++) {
-        n = odd_n[i].size();
+    std::vector< Vertex > old_vertices = vertices;
+    for (unsigned int i = 0; i<len_vertices ; i++) {
+        n = neighbour_vertices[i].size();
         if (n == 2) {
-            vertices[i] = 1.f/8.f*(odd_vertexPositions[odd_n[i][0]] + odd_vertexPositions[odd_n[i][1]]) + 3.f/4.f*vertices[i];
-            addNewCoeff(i, {len_vertices + odd_n[i][0], 1.f/8.f});
-            addNewCoeff(i, {len_vertices + odd_n[i][1], 1.f/8.f});
-            addNewCoeff(i, {i, 3.f/4.f});
+            res = Vertex(0.f,0.f,0.f);
+            for(unsigned int j : neighbour_vertices[i]) {
+                res += 1.f/8.f * old_vertices[j];
+                addCoeff(i, {j, 1.f/8.f});
+            }
+            res += 3.f/4.f * vertices[i];
+            addCoeff(i, {i, 3.f/4.f});
+            vertices[i] = res;
 
         } else if (n == 3) {
             res = Vertex(0.f,0.f,0.f);
-            for(unsigned int j : odd_n[i]) {
-                res += alpha3 *  odd_vertexPositions[j];
-                addNewCoeff(i, {len_vertices + j, alpha3});
+            for(unsigned int j : neighbour_vertices[i]) {
+                res += alpha3 *  old_vertices[j];
+                addCoeff(i, {j, alpha3});
             }
             res += (1 - 3.f*alpha3) * vertices[i];
-            addNewCoeff(i, {i,1 - 3.f*alpha3});
+            addCoeff(i, {i,1 - 3.f*alpha3});
             vertices[i] = res;
         }
         else {
             res = Vertex(0.f,0.f,0.f);
-            for(unsigned int j : odd_n[i]) {
-                res += alphan/(float)n *  odd_vertexPositions[j];
-                addNewCoeff(i, {len_vertices + j, alphan/(float)n});
+            for(unsigned int j : neighbour_vertices[i]) {
+                res += alphan/(float)n *  old_vertices[j];
+                addCoeff(i, {j, alphan/(float)n});
             }
             res += (1-alphan) * vertices[i];
-            addNewCoeff(i, {i,1 - alphan});
+            addCoeff(i, {i,1 - alphan});
             vertices[i] = res;
         }
     }
-
-    for(int i = 0; i < len_vertices; i++) {
-        coeffs[i] = newCoeffs[i];
-    }
-
     vertices.insert(vertices.end(), odd_vertexPositions.begin(), odd_vertexPositions.end());
     triangles = new_triangleIndices;
-}
-
-void Mesh::addNewCoeff(unsigned int vertex, coeff k) {
-    for(auto const & it : coeffs[k.vertex]) {
-        newCoeffs[vertex][it.first] += it.second * k.lambda;
-    }
-}
-
-
-void Mesh::addCoeff(unsigned int vertex, coeff k) {
-    for(auto const & it : coeffs[k.vertex]) {
-        coeffs[vertex][it.first] += it.second * k.lambda;
-    }
 }
 
 void Mesh::redisplay() {
