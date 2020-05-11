@@ -215,6 +215,18 @@ void Mesh::basicDisplay() {
         coeffs[i][i] = 1.f;
 }
 
-
 void Mesh::transform(const Transformation & t) {
+    unsigned int n = basicVertices.size();
+    //unsigned int len = vertices.size();
+    float coeff_tmp;
+    Eigen::MatrixXf A(n,n);
+    //To improve: matrice symétrique.
+    for(auto const & v_coeff : coeffs) {
+        for(auto const & coeff1 : v_coeff){
+            for(auto const & coeff2 : v_coeff){
+                A(coeff1.first,coeff2.first) += coeff1.second * coeff2.second;
+            }
+        }
+    }
+    Eigen::MatrixXf A_1 = A.inverse();
 }
