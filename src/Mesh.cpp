@@ -209,9 +209,6 @@ void Mesh::basicDisplay() {
         coeffs[i][i] = 1.f;
 }
 
-void computeA_1() {
-}
-
 void computeWi(const std::vector<GausCoeff>gCoeffs) {
 }
 

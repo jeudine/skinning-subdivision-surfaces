@@ -70,15 +70,14 @@ struct Mesh{
 
     std::vector< std::map< unsigned int, float > > coeffs;
 
-    std::vector<SpMat> Ap;
-    SpMat A_1; //Sparse ??
+    std::vector<SpMat> Ap; //compute in subdivise
+    SpMat A_1; // compute in subdivise Sparse ??
     std::vector<SpMat> Qi; //Sparse ??
 
     void subdivide();
-    void redisplay();
+    void redisplay(); //TO DO: integrate this function in transform
     void basicDisplay();
-    void computeA_1();
-    void computeWi(const std::vector<GausCoeff>);
+    void computeQi(const std::vector<GausCoeff>);
     void transform(const float **);
 };
 #endif // PROJECTMESH_H
