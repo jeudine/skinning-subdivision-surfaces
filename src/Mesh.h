@@ -4,6 +4,9 @@
 #include <vector>
 #include "point3.h"
 #include <map>
+#include <eigen3/Eigen/SparseCore>
+
+typedef Eigen::SparseMatrix<float> SpMat;
 
 struct Vertex{
     point3d p;
@@ -54,22 +57,9 @@ struct coeff{
 };
 
 struct GausCoeff {
-    float a;
-    float c;
-    Vertex pos;
-    GausCoeff(float _a = 1, float _c = 1, Vertex _pos = {0,0,0}) : a(_a), c(_c), pos(_pos) {}
-};
-
-struct Transformation {
-    float T[4][4];
-    GausCoeff gcoeff;
-    Transformation(float _T[4][4] ,float _a = 1, float _c = 1, Vertex _pos ={0, 0, 0}) : gcoeff(_a, _c, _pos)
-    {
-        for(int i = 0; i<4; i++)
-            for (int j = 0; j<4; j++)
-                T[i][j] = _T[i][j];
-    }
-
+    Vertex mean;
+    float variance;
+    GausCoeff(Vertex _mean = {0,0,0}, float _variance = 1) : mean(_mean), variance(_variance) {}
 };
 
 struct Mesh{
@@ -77,10 +67,18 @@ struct Mesh{
     std::vector< Vertex > basicVertices;
     std::vector< Triangle > triangles;
     std::vector< Triangle > basicTriangles;
+
     std::vector< std::map< unsigned int, float > > coeffs;
+
+    std::vector<SpMat> Ap;
+    SpMat A_1; //Sparse ??
+    std::vector<SpMat> Qi; //Sparse ??
+
     void subdivide();
     void redisplay();
     void basicDisplay();
-    void transform(const Transformation & t);
+    void computeA_1();
+    void computeWi(const std::vector<GausCoeff>);
+    void transform(const float **);
 };
 #endif // PROJECTMESH_H
