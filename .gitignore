@@ -1,0 +1,5 @@
+.qmake.stash
+Makefile
+tmp/*
+myProject
+extern/libQGLViewer-2.6.1/*
