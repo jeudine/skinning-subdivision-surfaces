@@ -4,10 +4,8 @@
 #include <vector>
 #include "point3.h"
 #include <map>
-#include <eigen3/Eigen/SparseCore>
 #include <eigen3/Eigen/Dense>
-
-typedef Eigen::SparseMatrix<float> SpMat;
+#include <math.h>
 
 struct Vertex{
     point3d p;
@@ -19,6 +17,10 @@ struct Vertex{
             p[0]+v[0],
             p[1]+v[1],
             p[2]+v[2]);}
+    Vertex operator - (const Vertex & v) { return Vertex(
+            p[0]-v[0],
+            p[1]-v[1],
+            p[2]-v[2]);}
     Vertex operator / (const float s) { return Vertex(p[0]/s, p[1]/s, p[2]/s);}
     Vertex operator += (const Vertex & v) { return Vertex(
             p[0]+=v[0],
@@ -68,10 +70,7 @@ struct Mesh{
     std::vector< Vertex > basicVertices;
     std::vector< Triangle > triangles;
     std::vector< Triangle > basicTriangles;
-
     std::vector< std::map< unsigned int, float > > coeffs;
-
-    Eigen::MatrixXf A_1; // computed in computeMats()
     std::vector<Eigen::MatrixXf> Qi;
 
     void subdivide();
@@ -79,5 +78,13 @@ struct Mesh{
     void basicDisplay();
     void computeQi(const std::vector<GausCoeff>);
     void transform(const float **);
+
+    private:
+    float area_d3 (unsigned int k) {
+        const Triangle T = triangles[k];
+        const Vertex AB = vertices[T[1]] - vertices[T[0]];
+        const Vertex AC = vertices[T[2]] - vertices[T[0]];
+        return sqrt(pow(AB[1]*AC[2] - AB[2]*AC[1],2) + pow(AB[2]*AC[0] - AB[0] * AC[2],2) + pow(AB[0]*AC[1] - AB[1] * AC[0],2))/6;
+    }
 };
 #endif // PROJECTMESH_H

@@ -1,8 +1,10 @@
 #include "Mesh.h"
 #include <set>
+#include <eigen3/Eigen/SparseCore>
 
 using namespace std;
 using namespace Eigen;
+typedef Eigen::SparseMatrix<float> SpMat;
 
 void Mesh::subdivide() {
 
@@ -15,7 +17,7 @@ void Mesh::subdivide() {
     map<unsigned int, vector <unsigned int>> even_n;
     vector <Uvec2>::iterator it;
     unsigned int counter = vertices.size();
-    unsigned int len_vertices = counter;
+    const unsigned int len_vertices = counter;
     Vertex x, y ,z;
     Triangle new_triangle;
 
@@ -211,12 +213,27 @@ void Mesh::basicDisplay() {
 }
 
 void Mesh::computeQi(const std::vector<GausCoeff>gCoeffs) {
-    unsigned int len_coeffs = coeffs.size();
-    unsigned int len_basic = basicVertices.size();
-    std::vector<SpMat> Ap(len_coeffs);
+    const unsigned int len_coeffs = coeffs.size();
+    const unsigned int len_basic = basicVertices.size();
 
+    //compute dp
+    const unsigned int len_triangles = triangles.size();
+    vector<float> dp(len_coeffs, 0);
+    float area;
+    for(unsigned int k = 0; k < len_triangles; k++) {
+        area = area_d3(k);
+        dp[triangles[k][0]] += area;
+        dp[triangles[k][1]] += area;
+        dp[triangles[k][2]] += area;
+    }
+
+    //compute Qi
+    std::vector<SpMat> Ap(len_coeffs);
     std::map<unsigned int, float>::const_iterator j;
-    MatrixXf mat_A(len_basic, len_basic);
+    MatrixXf A(len_basic, len_basic);
+
+    //for (auto const & gCoeff : gCoeffs) {
+    //reset objects
 
     for (unsigned int k = 0; k < len_coeffs; k++) {
         Ap[k] = SpMat(len_basic,len_basic);
@@ -229,11 +246,9 @@ void Mesh::computeQi(const std::vector<GausCoeff>gCoeffs) {
             }
             Ap[k].insert(i.first, i.first) = i.first * i.first;
         }
-        mat_A += Ap[k];
+        A += dp[k] * Ap[k];
     }
-    MatrixXf A_1 = mat_A.inverse();
-
-    cout << A_1 << endl;
+    MatrixXf A_1 = A.inverse();
 }
 
 void transform(const float ** T) {
