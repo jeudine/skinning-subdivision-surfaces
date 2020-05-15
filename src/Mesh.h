@@ -5,6 +5,7 @@
 #include "point3.h"
 #include <map>
 #include <eigen3/Eigen/SparseCore>
+#include <eigen3/Eigen/Dense>
 
 typedef Eigen::SparseMatrix<float> SpMat;
 
@@ -70,9 +71,8 @@ struct Mesh{
 
     std::vector< std::map< unsigned int, float > > coeffs;
 
-    std::vector<SpMat> Ap; //compute in subdivise
-    SpMat A_1; // compute in subdivise Sparse ??
-    std::vector<SpMat> Qi; //Sparse ??
+    Eigen::MatrixXf A_1; // computed in computeMats()
+    std::vector<Eigen::MatrixXf> Qi;
 
     void subdivide();
     void redisplay(); //TO DO: integrate this function in transform

@@ -2,6 +2,7 @@
 #include <set>
 
 using namespace std;
+using namespace Eigen;
 
 void Mesh::subdivide() {
 
@@ -209,7 +210,30 @@ void Mesh::basicDisplay() {
         coeffs[i][i] = 1.f;
 }
 
-void computeWi(const std::vector<GausCoeff>gCoeffs) {
+void Mesh::computeQi(const std::vector<GausCoeff>gCoeffs) {
+    unsigned int len_coeffs = coeffs.size();
+    unsigned int len_basic = basicVertices.size();
+    std::vector<SpMat> Ap(len_coeffs);
+
+    std::map<unsigned int, float>::const_iterator j;
+    MatrixXf mat_A(len_basic, len_basic);
+
+    for (unsigned int k = 0; k < len_coeffs; k++) {
+        Ap[k] = SpMat(len_basic,len_basic);
+        for (auto const & i : coeffs[k]) {
+            j = coeffs[k].cbegin();
+            while(j->first < i.first) {
+                Ap[k].insert(i.first, j->first) = i.second * j->second;
+                Ap[k].insert(j->first, i.first) = i.second * j->second;
+                j++;
+            }
+            Ap[k].insert(i.first, i.first) = i.first * i.first;
+        }
+        mat_A += Ap[k];
+    }
+    MatrixXf A_1 = mat_A.inverse();
+
+    cout << A_1 << endl;
 }
 
 void transform(const float ** T) {
