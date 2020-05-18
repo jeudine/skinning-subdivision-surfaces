@@ -204,12 +204,18 @@ public :
                 }
             }
         }
-        else if (event->key() == Qt::Key_S)
+        else if (event->key() == Qt::Key_S) {
             mesh.subdivide();
-        else if (event->key() == Qt::Key_R)
+            this->update();
+        }
+        else if (event->key() == Qt::Key_R) {
             mesh.redisplay();
-        else if (event->key() == Qt::Key_B)
+            this->update();
+        }
+        else if (event->key() == Qt::Key_B) {
             mesh.basicDisplay();
+            this->update();
+        }
 
     }
 
@@ -258,10 +264,16 @@ public slots:
         bool success = false;
         QString fileName = QFileDialog::getOpenFileName(NULL,"","");
         if ( !fileName.isNull() ) { // got a file name
-            if(fileName.endsWith(QString(".off")))
+            if(fileName.endsWith(QString(".off"))) {
+                mesh.vertices.clear();
+                mesh.vertices.clear();
                 success = OFFIO::openTriMesh(fileName.toStdString() , mesh.vertices , mesh.triangles );
-            else if(fileName.endsWith(QString(".obj")))
+            }
+            else if(fileName.endsWith(QString(".obj"))) {
+                mesh.vertices.clear();
+                mesh.vertices.clear();
                 success = OBJIO::openTriMesh(fileName.toStdString() , mesh.vertices , mesh.triangles );
+            }
             if(success) {
                 mesh.basicVertices = mesh.vertices;
                 mesh.basicTriangles = mesh.triangles;
