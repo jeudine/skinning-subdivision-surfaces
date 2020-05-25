@@ -251,5 +251,12 @@ void Mesh::computeQi(const std::vector<GausCoeff>gCoeffs) {
     MatrixXf A_1 = A.inverse();
 }
 
-void transform(const float ** T) {
+void Mesh::transform(const vector<MatrixXf> & T) {
+    Eigen::MatrixXf C;
+    for (unsigned int i = 0; i < T.size(); i++) {
+        C += T[i]*Qi[i];
+    }
+    for (unsigned int j = 0; j < basicVertices.size(); j++) {
+        basicVertices[j] = Vertex(C(0,j), C(1,j), C(2,j));
+    }
 }
