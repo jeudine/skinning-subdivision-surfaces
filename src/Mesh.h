@@ -81,7 +81,7 @@ struct Mesh{
     void redisplay(); //TODO: integrate this function into transform
     void basicDisplay();
     void computeQis(const std::vector<GausCoeff>);
-    void transform(const float **);
+    void transform(const std::vector<Eigen::MatrixXf> & T);
 
     private:
     float area_d3 (unsigned int k) {

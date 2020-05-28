@@ -276,5 +276,12 @@ void Mesh::computeQis(const std::vector<GausCoeff>gCoeffs) {
     }
 }
 
-void transform(const float ** T) {
+void Mesh::transform(const vector<MatrixXf> & T) {
+    Eigen::MatrixXf C; //TODO: Maybe need to be initialized if not, delete initialization in computeQis
+    for (unsigned int i = 0; i < T.size(); i++) {
+        C += T[i]*Qis[i];
+    }
+    for (unsigned int j = 0; j < basicVertices.size(); j++) {
+        basicVertices[j] = Vertex(C(0,j), C(1,j), C(2,j));
+    }
 }
