@@ -216,6 +216,10 @@ public :
             mesh.basicDisplay();
             this->update();
         }
+        else if (event->key() == Qt::Key_C) {
+            std::vector<GausCoeff>gCoeffs;
+            mesh.computeQis(gCoeffs);
+        }
 
     }
 
@@ -259,40 +263,40 @@ public :
 signals:
     void windowTitleUpdated( const QString & );
 
-public slots:
-    void open_mesh() {
-        bool success = false;
-        QString fileName = QFileDialog::getOpenFileName(NULL,"","");
-        if ( !fileName.isNull() ) { // got a file name
-            if(fileName.endsWith(QString(".off"))) {
-                mesh.vertices.clear();
-                mesh.vertices.clear();
-                success = OFFIO::openTriMesh(fileName.toStdString() , mesh.vertices , mesh.triangles );
-            }
-            else if(fileName.endsWith(QString(".obj"))) {
-                mesh.vertices.clear();
-                mesh.vertices.clear();
-                success = OBJIO::openTriMesh(fileName.toStdString() , mesh.vertices , mesh.triangles );
-            }
-            if(success) {
-                mesh.basicVertices = mesh.vertices;
-                mesh.basicTriangles = mesh.triangles;
-                mesh.coeffs.resize(mesh.vertices.size());
-                for(unsigned int i = 0; i<mesh.vertices.size(); i++)
-                    mesh.coeffs[i][i] = 1;
-                std::cout << fileName.toStdString() << " was opened successfully" << std::endl;
-                point3d bb(FLT_MAX,FLT_MAX,FLT_MAX) , BB(-FLT_MAX,-FLT_MAX,-FLT_MAX);
-                for( unsigned int v = 0 ; v < mesh.vertices.size() ; ++v ) {
-                    bb = point3d::min(bb , mesh.vertices[v]);
-                    BB = point3d::max(BB , mesh.vertices[v]);
+    public slots:
+        void open_mesh() {
+            bool success = false;
+            QString fileName = QFileDialog::getOpenFileName(NULL,"","");
+            if ( !fileName.isNull() ) { // got a file name
+                if(fileName.endsWith(QString(".off"))) {
+                    mesh.vertices.clear();
+                    mesh.vertices.clear();
+                    success = OFFIO::openTriMesh(fileName.toStdString() , mesh.vertices , mesh.triangles );
                 }
-                adjustCamera(bb,BB);
-                update();
+                else if(fileName.endsWith(QString(".obj"))) {
+                    mesh.vertices.clear();
+                    mesh.vertices.clear();
+                    success = OBJIO::openTriMesh(fileName.toStdString() , mesh.vertices , mesh.triangles );
+                }
+                if(success) {
+                    mesh.basicVertices = mesh.vertices;
+                    mesh.basicTriangles = mesh.triangles;
+                    mesh.coeffs.resize(mesh.vertices.size());
+                    for(unsigned int i = 0; i<mesh.vertices.size(); i++)
+                        mesh.coeffs[i][i] = 1;
+                    std::cout << fileName.toStdString() << " was opened successfully" << std::endl;
+                    point3d bb(FLT_MAX,FLT_MAX,FLT_MAX) , BB(-FLT_MAX,-FLT_MAX,-FLT_MAX);
+                    for( unsigned int v = 0 ; v < mesh.vertices.size() ; ++v ) {
+                        bb = point3d::min(bb , mesh.vertices[v]);
+                        BB = point3d::max(BB , mesh.vertices[v]);
+                    }
+                    adjustCamera(bb,BB);
+                    update();
+                }
+                else
+                    std::cout << fileName.toStdString() << " could not be opened" << std::endl;
             }
-            else
-                std::cout << fileName.toStdString() << " could not be opened" << std::endl;
         }
-    }
 
     void save_mesh() {
         bool success = false;
@@ -322,9 +326,9 @@ public slots:
             exit (EXIT_FAILURE);
         // << operator for point3 causes linking problem on windows
         out << camera()->position()[0] << " \t" << camera()->position()[1] << " \t" << camera()->position()[2] << " \t" " " <<
-                                          camera()->viewDirection()[0] << " \t" << camera()->viewDirection()[1] << " \t" << camera()->viewDirection()[2] << " \t" << " " <<
-                                          camera()->upVector()[0] << " \t" << camera()->upVector()[1] << " \t" <<camera()->upVector()[2] << " \t" <<" " <<
-                                          camera()->fieldOfView();
+            camera()->viewDirection()[0] << " \t" << camera()->viewDirection()[1] << " \t" << camera()->viewDirection()[2] << " \t" << " " <<
+            camera()->upVector()[0] << " \t" << camera()->upVector()[1] << " \t" <<camera()->upVector()[2] << " \t" <<" " <<
+            camera()->fieldOfView();
         out << std::endl;
 
         out.close ();
@@ -341,9 +345,9 @@ public slots:
         float fov;
 
         file >> (pos[0]) >> (pos[1]) >> (pos[2]) >>
-                                                    (view[0]) >> (view[1]) >> (view[2]) >>
-                                                                                           (up[0]) >> (up[1]) >> (up[2]) >>
-                                                                                                                            fov;
+            (view[0]) >> (view[1]) >> (view[2]) >>
+            (up[0]) >> (up[1]) >> (up[2]) >>
+            fov;
 
         camera()->setPosition(pos);
         camera()->setViewDirection(view);

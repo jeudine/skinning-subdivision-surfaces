@@ -1,7 +1,10 @@
 #include "Mesh.h"
 #include <set>
+#include <eigen3/Eigen/SparseCore>
 
 using namespace std;
+using namespace Eigen;
+typedef Eigen::SparseMatrix<float> SpMat;
 
 void Mesh::subdivide() {
 
@@ -14,12 +17,12 @@ void Mesh::subdivide() {
     map<unsigned int, vector <unsigned int>> even_n;
     vector <Uvec2>::iterator it;
     unsigned int counter = vertices.size();
-    unsigned int len_vertices = counter;
+    const unsigned int len_vertices = counter;
     Vertex x, y ,z;
     Triangle new_triangle;
 
     int triangle_count = 0;
-    neighbour_vertices.resize(len_vertices);
+    neighbour_vertices.resize(len_vertices); //TODO cf computeQis
 
     auto create_odd_vertex=[&](unsigned int & odd_vertex, unsigned int even_vertex1, unsigned int even_vertex2) -> void {
         unsigned int tmp;
@@ -66,7 +69,7 @@ void Mesh::subdivide() {
 
     // move
     std::vector< std::map< unsigned int, float > > old_coeffs = coeffs;
-    coeffs.clear();
+    coeffs.clear(); //TODO cf computeQis
     coeffs.resize(counter);
 
     auto addCoeff=[&](unsigned int vertex, coeff k) -> void {
@@ -203,14 +206,82 @@ void Mesh::redisplay() {
 void Mesh::basicDisplay() {
     vertices = basicVertices;
     triangles = basicTriangles;
-    coeffs.clear();
+    coeffs.clear(); // TODO modify cd computeQis
     coeffs.resize(basicVertices.size());
     for(unsigned int i = 0; i<basicVertices.size(); i++)
         coeffs[i][i] = 1.f;
 }
 
-void computeWi(const std::vector<GausCoeff>gCoeffs) {
+void Mesh::computeQis(const std::vector<GausCoeff>gCoeffs) {
+    const unsigned int len_coeffs = coeffs.size();
+    const unsigned int len_basic = basicVertices.size();
+    const unsigned int len_gCoeffs = gCoeffs.size();
+
+    //compute dp
+    const unsigned int len_triangles = triangles.size();
+    vector<float> dp(len_coeffs, 0);
+    float area;
+    for(unsigned int k = 0; k < len_triangles; k++) {
+        area = area_d3(k);
+        dp[triangles[k][0]] += area;
+        dp[triangles[k][1]] += area;
+        dp[triangles[k][2]] += area;
+    }
+
+    //compute Qis
+    SpMat Ap(len_basic,len_basic);
+    std::map<unsigned int, float>::const_iterator j;
+    MatrixXf A(len_basic, len_basic);
+
+    Qis = vector<MatrixXf>(len_gCoeffs);
+    vector<MatrixXf> tis = vector<MatrixXf>(len_gCoeffs);
+    vector<float> normWis(len_gCoeffs);
+    float wis;
+
+    for(unsigned int i = 0; i < len_gCoeffs; i++) {
+        tis[i] = MatrixXf(len_basic, len_basic);
+    }
+
+    for (unsigned int k = 0; k < len_coeffs; k++) {
+        Ap.setZero();
+        for (auto const & i : coeffs[k]) {
+            j = coeffs[k].cbegin();
+            while(j->first < i.first) {
+                Ap.insert(i.first, j->first) = i.second * j->second;
+                Ap.insert(j->first, i.first) = i.second * j->second;
+                j++;
+            }
+            Ap.insert(i.first, i.first) = i.first * i.first;
+        }
+        for(unsigned int i = 0; i < len_gCoeffs; i++) {
+            wis = exp(-(vertices[k] - gCoeffs[i].mean).sqrnorm()/(2*gCoeffs[i].variance));
+            tis[i] += wis * Ap * dp[k];
+            normWis[i] += wis;
+        }
+        A += dp[k] * Ap;
+    }
+
+    MatrixXf A_1 = A.inverse();
+
+    MatrixXf C(3, len_basic);
+
+    for(unsigned int j = 0; j < len_basic; j++) {
+        C(0,j) = basicVertices[j][0];
+        C(1,j) = basicVertices[j][1];
+        C(2,j) = basicVertices[j][2];
+    }
+
+    for(unsigned int i = 0; i < len_gCoeffs; i++) {
+        Qis[i] = C * tis[i] * A_1/normWis[i];
+    }
 }
 
-void transform(const float ** T) {
+void Mesh::transform(const vector<MatrixXf> & T) {
+    Eigen::MatrixXf C; //TODO: Maybe need to be initialized if not, delete initialization in computeQis
+    for (unsigned int i = 0; i < T.size(); i++) {
+        C += T[i]*Qis[i];
+    }
+    for (unsigned int j = 0; j < basicVertices.size(); j++) {
+        basicVertices[j] = Vertex(C(0,j), C(1,j), C(2,j));
+    }
 }

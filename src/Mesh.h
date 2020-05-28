@@ -4,9 +4,8 @@
 #include <vector>
 #include "point3.h"
 #include <map>
-#include <eigen3/Eigen/SparseCore>
-
-typedef Eigen::SparseMatrix<float> SpMat;
+#include <eigen3/Eigen/Dense>
+#include <math.h>
 
 struct Vertex{
     point3d p;
@@ -14,17 +13,25 @@ struct Vertex{
     Vertex(float x , float y , float z) : p(x,y,z) {}
     double & operator [] (unsigned int c) { return p[c]; }
     double operator [] (unsigned int c) const { return p[c]; }
-    Vertex operator + (const Vertex & v) { return Vertex(
+    Vertex operator + (const Vertex & v) const { return Vertex(
             p[0]+v[0],
             p[1]+v[1],
             p[2]+v[2]);}
-    Vertex operator / (const float s) { return Vertex(p[0]/s, p[1]/s, p[2]/s);}
+    Vertex operator - (const Vertex & v) const { return Vertex(
+            p[0]-v[0],
+            p[1]-v[1],
+            p[2]-v[2]);}
+    Vertex operator / (const float s) const { return Vertex(p[0]/s, p[1]/s, p[2]/s);}
     Vertex operator += (const Vertex & v) { return Vertex(
             p[0]+=v[0],
             p[1]+=v[1],
             p[2]+=v[2]);}
     friend Vertex operator * (const float s, const Vertex & v) {
         return Vertex(v[0]*s, v[1]*s, v[2]*s);
+    }
+
+    float sqrnorm() const {
+        return p.sqrnorm();
     }
 
 };
@@ -67,17 +74,21 @@ struct Mesh{
     std::vector< Vertex > basicVertices;
     std::vector< Triangle > triangles;
     std::vector< Triangle > basicTriangles;
-
     std::vector< std::map< unsigned int, float > > coeffs;
-
-    std::vector<SpMat> Ap; //compute in subdivise
-    SpMat A_1; // compute in subdivise Sparse ??
-    std::vector<SpMat> Qi; //Sparse ??
+    std::vector<Eigen::MatrixXf> Qis;
 
     void subdivide();
-    void redisplay(); //TO DO: integrate this function in transform
+    void redisplay(); //TODO: integrate this function into transform
     void basicDisplay();
-    void computeQi(const std::vector<GausCoeff>);
-    void transform(const float **);
+    void computeQis(const std::vector<GausCoeff>);
+    void transform(const std::vector<Eigen::MatrixXf> & T);
+
+    private:
+    float area_d3 (unsigned int k) {
+        const Triangle T = triangles[k];
+        const Vertex AB = vertices[T[1]] - vertices[T[0]];
+        const Vertex AC = vertices[T[2]] - vertices[T[0]];
+        return sqrt(pow(AB[1]*AC[2] - AB[2]*AC[1],2) + pow(AB[2]*AC[0] - AB[0] * AC[2],2) + pow(AB[0]*AC[1] - AB[1] * AC[0],2))/6;
+    }
 };
 #endif // PROJECTMESH_H
