@@ -212,7 +212,7 @@ public :
             mesh.basicDisplay();
         else if (event->key() == Qt::Key_C) {
             std::vector<GausCoeff>gCoeffs;
-            mesh.computeQi(gCoeffs);
+            mesh.computeQis(gCoeffs);
         }
 
     }

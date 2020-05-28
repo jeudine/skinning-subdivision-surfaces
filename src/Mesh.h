@@ -13,21 +13,25 @@ struct Vertex{
     Vertex(float x , float y , float z) : p(x,y,z) {}
     double & operator [] (unsigned int c) { return p[c]; }
     double operator [] (unsigned int c) const { return p[c]; }
-    Vertex operator + (const Vertex & v) { return Vertex(
+    Vertex operator + (const Vertex & v) const { return Vertex(
             p[0]+v[0],
             p[1]+v[1],
             p[2]+v[2]);}
-    Vertex operator - (const Vertex & v) { return Vertex(
+    Vertex operator - (const Vertex & v) const { return Vertex(
             p[0]-v[0],
             p[1]-v[1],
             p[2]-v[2]);}
-    Vertex operator / (const float s) { return Vertex(p[0]/s, p[1]/s, p[2]/s);}
+    Vertex operator / (const float s) const { return Vertex(p[0]/s, p[1]/s, p[2]/s);}
     Vertex operator += (const Vertex & v) { return Vertex(
             p[0]+=v[0],
             p[1]+=v[1],
             p[2]+=v[2]);}
     friend Vertex operator * (const float s, const Vertex & v) {
         return Vertex(v[0]*s, v[1]*s, v[2]*s);
+    }
+
+    float sqrnorm() const {
+        return p.sqrnorm();
     }
 
 };
@@ -71,12 +75,12 @@ struct Mesh{
     std::vector< Triangle > triangles;
     std::vector< Triangle > basicTriangles;
     std::vector< std::map< unsigned int, float > > coeffs;
-    std::vector<Eigen::MatrixXf> Qi;
+    std::vector<Eigen::MatrixXf> Qis;
 
     void subdivide();
-    void redisplay(); //TO DO: integrate this function in transform
+    void redisplay(); //TODO: integrate this function into transform
     void basicDisplay();
-    void computeQi(const std::vector<GausCoeff>);
+    void computeQis(const std::vector<GausCoeff>);
     void transform(const float **);
 
     private:
