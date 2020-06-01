@@ -3,12 +3,18 @@
 
 #include <QGLViewer/vec.h>
 #include <eigen3/Eigen/SparseCore>
+#include <QGLViewer/qglviewer.h>
+
 
 class Gizmo{
 public:
     qglviewer::Vec origin;
     Eigen::MatrixXf transforMatrix;
+    qglviewer::ManipulatedFrame* frame;
 
+    qglviewer::ManipulatedFrame* getFrame(){
+        return frame;
+    }
 
     void setOrigin(qglviewer::Vec origin){
         this->origin = origin;
@@ -44,9 +50,11 @@ public:
         this->transforMatrix.resize(4,4);
         this->origin = origin;
         this->setTransfoMatrix(newPosition, rotation);
+        this->frame =  new qglviewer::ManipulatedFrame();
     }
 
     Gizmo(){
+        this->frame =  new qglviewer::ManipulatedFrame();
         this->transforMatrix.resize(4,4);
         this->origin = qglviewer::Vec(0,0,0);
     }
