@@ -237,13 +237,24 @@ public :
         }
         else if (event->key() == Qt::Key_C) {
             std::vector<GausCoeff>gCoeffs;
+            std::vector<Eigen::MatrixXf> listMatrix;
+            for(int i = 0; i < gizmos.size(); i++){
+                gCoeffs.push_back(GausCoeff({0,0,0}, 3));
+                listMatrix.push_back(gizmos[i].getMatrix());
+
+                }
             mesh.computeQis(gCoeffs);
+            mesh.transform(listMatrix);
+
+
+
         }
         else if( event->key() == Qt::Key_U){
             selectedGizmo ++;
             selectedGizmo = selectedGizmo % gizmos.size();
             setManipulatedFrame(gizmos[selectedGizmo].getFrame());
         }
+
 
     }
 
