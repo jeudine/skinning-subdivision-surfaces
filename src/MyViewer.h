@@ -27,6 +27,7 @@
 #include <QInputDialog>
 #include <QLineEdit>
 
+#include <eigen3/Eigen/SparseCore>
 
 
 #include "qt/QSmartAction.h"
@@ -40,6 +41,8 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
     Mesh mesh;
     Gizmo gizmo;
     QWidget * controls;
+    std::vector<Gizmo> gizmos;
+    unsigned int selectedGizmo = 0;
 
 
 public :
@@ -84,20 +87,35 @@ public :
             glVertex3f(p2[0],p2[1],p2[2]);
         }
         drawAxis();
-        glPushMatrix();
-        glMultMatrixd(manipulatedFrame()->matrix());
+        for(unsigned int i = 0; i < gizmos.size(); i++){
+            glPushMatrix();
+            if(i == selectedGizmo){
+                glMultMatrixd(manipulatedFrame()->matrix());
 
-        qglviewer::Vec position = manipulatedFrame()->position();
-        qglviewer::Quaternion orientation = manipulatedFrame()->orientation();
-        // Depuis la classe quaterion on peut recuperer une rotation matrix avec getRotationMatrix(qreal m[3][3]) const
-        qreal rotationMatrix[3][3];
-        orientation.getRotationMatrix(rotationMatrix);
-        std::cout << "Orientation du frame: "<< orientation << std::endl;
-        std::cout << "Postion du frame: " << position << std::endl;
-        gizmo.setTransfoMatrix(position, rotationMatrix);
-        glScalef(0.3f, 0.3f, 0.3f);
-        drawAxis();
-        glPopMatrix();
+                qglviewer::Vec position = manipulatedFrame()->position();
+                qglviewer::Quaternion orientation = manipulatedFrame()->orientation();
+                // Depuis la classe quaterion on peut recuperer une rotation matrix avec getRotationMatrix(qreal m[3][3]) const
+                qreal rotationMatrix[3][3];
+                orientation.getRotationMatrix(rotationMatrix);
+                std::cout << "Orientation du frame: "<< orientation << std::endl;
+                std::cout << "Postion du frame: " << position << std::endl;
+                gizmos[selectedGizmo].setTransfoMatrix(position, rotationMatrix);
+                glScalef(0.3f, 0.3f, 0.3f);
+
+                drawAxis();
+                glPopMatrix();
+            }
+            else{
+                glMultMatrixd(gizmos[i].getFrame()->matrix());
+                glScalef(0.3f, 0.3f, 0.3f);
+
+                drawAxis();
+                glPopMatrix();
+
+            }
+        }
+
+
 
         glEnd();
     }
@@ -180,6 +198,7 @@ public :
         text += "<li>S   :   Subdivide the mesh with the Loop subdivision</li>";
         text += "<li>R   :   Redisplay the shape using the control points weights and the control points</li>";
         text += "<li>B   :   Display the basic mesh</li>";
+        text += "<li>U   : Change the selected gizmo</li>";
         text += "</ul>";
         return text;
     }
@@ -220,6 +239,11 @@ public :
             std::vector<GausCoeff>gCoeffs;
             mesh.computeQis(gCoeffs);
         }
+        else if( event->key() == Qt::Key_U){
+            selectedGizmo ++;
+            selectedGizmo = selectedGizmo % gizmos.size();
+            setManipulatedFrame(gizmos[selectedGizmo].getFrame());
+        }
 
     }
 
@@ -246,8 +270,16 @@ public :
         if( (e->modifiers() & Qt::AltModifier)  &&  (e->button() == Qt::LeftButton) )
         {
             qglviewer::Vec point = camera()->pointUnderPixel(e->pos(), found);
+            //Avant multi gizmo
+            /*manipulatedFrame()->setPosition(point);
+            gizmo.setOrigin(point);*/
+
+            //Avec multi gizmo
+            gizmos.push_back(Gizmo());
+            selectedGizmo = gizmos.size() - 1;
+            gizmos[selectedGizmo].setOrigin(point);
+            setManipulatedFrame(gizmos[selectedGizmo].getFrame());
             manipulatedFrame()->setPosition(point);
-            gizmo.setOrigin(point);
             return;
         }
     }
