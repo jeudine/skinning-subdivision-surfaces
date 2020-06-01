@@ -302,12 +302,12 @@ signals:
             if ( !fileName.isNull() ) { // got a file name
                 if(fileName.endsWith(QString(".off"))) {
                     mesh.vertices.clear();
-                    mesh.vertices.clear();
+                    mesh.triangles.clear();
                     success = OFFIO::openTriMesh(fileName.toStdString() , mesh.vertices , mesh.triangles );
                 }
                 else if(fileName.endsWith(QString(".obj"))) {
                     mesh.vertices.clear();
-                    mesh.vertices.clear();
+                    mesh.triangles.clear();
                     success = OBJIO::openTriMesh(fileName.toStdString() , mesh.vertices , mesh.triangles );
                 }
                 if(success) {
