@@ -234,15 +234,14 @@ void Mesh::computeQis(const std::vector<GausCoeff>gCoeffs) {
 
     Qis = vector<MatrixXf>(len_gCoeffs);
     vector<MatrixXf> tis = vector<MatrixXf>(len_gCoeffs);
-    vector<float> normWis(len_gCoeffs);
-    float wis;
+    vector<float> wis(len_gCoeffs);
 
     for(unsigned int i = 0; i < len_gCoeffs; i++) {
         tis[i] = MatrixXf::Zero(len_basic, len_basic);
-        normWis[i] = 0;
     }
 
     for (unsigned int k = 0; k < len_coeffs; k++) {
+        float normWis = 0;
         Ap.setZero();
         for (auto const & i : coeffs[k]) {
             j = coeffs[k].cbegin();
@@ -254,9 +253,11 @@ void Mesh::computeQis(const std::vector<GausCoeff>gCoeffs) {
             Ap.insert(i.first, i.first) = i.first * i.first;
         }
         for(unsigned int i = 0; i < len_gCoeffs; i++) {
-            wis = exp(-(vertices[k] - gCoeffs[i].mean).sqrnorm()/(2*gCoeffs[i].variance));
-            tis[i] += wis * dp[k] * Ap;
-            normWis[i] += wis;
+            wis[i] = exp(-(vertices[k] - gCoeffs[i].mean).sqrnorm()/(2*gCoeffs[i].variance));
+            normWis += wis[i];
+        }
+        for(unsigned int i = 0; i < len_gCoeffs; i++) {
+            tis[i] += wis[i]/normWis * dp[k] * Ap;
         }
         A += dp[k] * Ap;
     }
@@ -272,7 +273,7 @@ void Mesh::computeQis(const std::vector<GausCoeff>gCoeffs) {
     }
 
     for(unsigned int i = 0; i < len_gCoeffs; i++) {
-        Qis[i] = C  * tis[i] * A_1/(4*normWis[i]/len_coeffs);
+        Qis[i] = C  * tis[i] * A_1;
         for(unsigned int j = 0; j < len_basic; j++) {
             Qis[i](3,j) = 1;
         }
