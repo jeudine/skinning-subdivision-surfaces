@@ -270,13 +270,11 @@ void Mesh::computeQis(const std::vector<GausCoeff>gCoeffs) {
         C(0,j) = basicVertices[j][0];
         C(1,j) = basicVertices[j][1];
         C(2,j) = basicVertices[j][2];
+        C(3,j) = 1;
     }
 
     for(unsigned int i = 0; i < len_gCoeffs; i++) {
         Qis[i] = C  * tis[i] * A_1;
-        for(unsigned int j = 0; j < len_basic; j++) {
-            Qis[i](3,j) = 1;
-        }
         cout << Qis[i] << endl;
     }
 }
