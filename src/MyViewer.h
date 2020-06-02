@@ -258,6 +258,19 @@ public :
             setManipulatedFrame(gizmos[selectedGizmo].getFrame());
             std::cout << "selected gizmo: " << selectedGizmo << std::endl;
         }
+
+        else if( event->key() == Qt::Key_A){
+            std::vector<Eigen::MatrixXf> listMatrix;//TODO: make a struct with the gauscoeff
+            for(unsigned int i = 0; i < gizmos.size(); i++){
+                listMatrix.push_back(gizmos[i].getMatrix());
+            }
+            std::vector<GausCoeff>gCoeffs;
+            for(unsigned int i = 0; i < gizmos.size(); i++){
+                gCoeffs.push_back(GausCoeff({(float)gizmos[i].getOrigin()[0], (float)gizmos[i].getOrigin()[1], (float)gizmos[i].getOrigin()[2]}, 1));
+            }
+
+            mesh.transform_Basic(listMatrix, gCoeffs);
+        }
         else if (event->key() == Qt::Key_D) {
             if (!gizmos.empty()) {
                 gizmos.erase(gizmos.begin() + selectedGizmo);

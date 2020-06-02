@@ -302,3 +302,24 @@ void Mesh::transform(const vector<MatrixXf> & T) {
         vertices[i] = tmp;
     }
 }
+
+
+void Mesh::transform_Basic(const vector<MatrixXf> & T, const std::vector<GausCoeff>gCoeffs) {
+    const unsigned int len_coeffs = coeffs.size();
+    const unsigned int len_gCoeffs = gCoeffs.size();
+    float wis;
+    for (unsigned int k = 0; k < len_coeffs; k++) {
+        Eigen::VectorXf tmp_e = Eigen::VectorXf::Zero(4);
+        Eigen::VectorXf tmp = Eigen::VectorXf::Zero(4);
+        float normWis = 0;
+        for(unsigned int i = 0; i < len_gCoeffs; i++) {
+            wis = exp(-(vertices[k] - gCoeffs[i].mean).sqrnorm()/(2*gCoeffs[i].variance));
+            normWis += wis;
+            for(unsigned int j = 0; j<3; j++)
+                tmp_e(j) = vertices[k][j];
+            tmp_e(3) = 1;
+            tmp += wis * T[i] * tmp_e;
+        }
+        vertices[k] = {tmp(0)/normWis, tmp(1)/normWis, tmp(2)/normWis};
+    }
+}
