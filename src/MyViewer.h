@@ -239,7 +239,8 @@ public :
         else if (event->key() == Qt::Key_C) {
             std::vector<GausCoeff>gCoeffs;
             for(unsigned int i = 0; i < gizmos.size(); i++){
-                gCoeffs.push_back(GausCoeff({0,0,0}, 3));
+                Vertex mean = {(float)gizmos[i].getOrigin()[0], (float)gizmos[i].getOrigin()[1], (float)gizmos[i].getOrigin()[2]};
+                gCoeffs.push_back(GausCoeff(mean, 3));
                 listMatrix.push_back(gizmos[i].getMatrix());
             }
             mesh.computeQis(gCoeffs);
