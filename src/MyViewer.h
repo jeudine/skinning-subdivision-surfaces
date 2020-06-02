@@ -43,6 +43,7 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
     QWidget * controls;
     std::vector<Gizmo> gizmos;
     unsigned int selectedGizmo = 0;
+    std::vector<Eigen::MatrixXf> listMatrix;//TODO: make a struct with the gauscoeff
 
 
 public :
@@ -237,16 +238,16 @@ public :
         }
         else if (event->key() == Qt::Key_C) {
             std::vector<GausCoeff>gCoeffs;
-            std::vector<Eigen::MatrixXf> listMatrix;
-            for(int i = 0; i < gizmos.size(); i++){
+            for(unsigned int i = 0; i < gizmos.size(); i++){
                 gCoeffs.push_back(GausCoeff({0,0,0}, 3));
                 listMatrix.push_back(gizmos[i].getMatrix());
-
-                }
+            }
             mesh.computeQis(gCoeffs);
+        }
+
+        else if (event->key() == Qt::Key_Y) {
             mesh.transform(listMatrix);
-
-
+            this->update();
 
         }
         else if( event->key() == Qt::Key_U){
@@ -254,8 +255,6 @@ public :
             selectedGizmo = selectedGizmo % gizmos.size();
             setManipulatedFrame(gizmos[selectedGizmo].getFrame());
         }
-
-
     }
 
     void mouseDoubleClickEvent( QMouseEvent * e )
@@ -283,7 +282,7 @@ public :
             qglviewer::Vec point = camera()->pointUnderPixel(e->pos(), found);
             //Avant multi gizmo
             /*manipulatedFrame()->setPosition(point);
-            gizmo.setOrigin(point);*/
+              gizmo.setOrigin(point);*/
 
             //Avec multi gizmo
             gizmos.push_back(Gizmo());

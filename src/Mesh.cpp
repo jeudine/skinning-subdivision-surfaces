@@ -263,12 +263,13 @@ void Mesh::computeQis(const std::vector<GausCoeff>gCoeffs) {
 
     MatrixXf A_1 = A.inverse();
 
-    MatrixXf C(3, len_basic);
+    MatrixXf C(4, len_basic);
 
     for(unsigned int j = 0; j < len_basic; j++) {
         C(0,j) = basicVertices[j][0];
         C(1,j) = basicVertices[j][1];
         C(2,j) = basicVertices[j][2];
+        C(3,j) = 1;
     }
 
     for(unsigned int i = 0; i < len_gCoeffs; i++) {
@@ -277,11 +278,21 @@ void Mesh::computeQis(const std::vector<GausCoeff>gCoeffs) {
 }
 
 void Mesh::transform(const vector<MatrixXf> & T) {
-    Eigen::MatrixXf C; //TODO: Maybe need to be initialized if not, delete initialization in computeQis
+    unsigned int len_basic = basicVertices.size();
+    Eigen::MatrixXf C(4, len_basic);
     for (unsigned int i = 0; i < T.size(); i++) {
         C += T[i]*Qis[i];
     }
-    for (unsigned int j = 0; j < basicVertices.size(); j++) {
+    for (unsigned int j = 0; j < len_basic; j++) {
         basicVertices[j] = Vertex(C(0,j), C(1,j), C(2,j));
+    }
+    unsigned int n = coeffs.size();
+    Vertex tmp;
+    for(unsigned int i = 0; i < n; i++) {
+        tmp = {0, 0, 0};
+        for (auto const & it : coeffs[i]) {
+            tmp += it.second * basicVertices[it.first];
+        }
+        vertices[i] = tmp;
     }
 }
