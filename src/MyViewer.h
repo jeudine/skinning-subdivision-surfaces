@@ -43,7 +43,6 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
     QWidget * controls;
     std::vector<Gizmo> gizmos;
     unsigned int selectedGizmo = 0;
-    std::vector<Eigen::MatrixXf> listMatrix;//TODO: make a struct with the gauscoeff
 
 
 public :
@@ -239,14 +238,16 @@ public :
         else if (event->key() == Qt::Key_C) {
             std::vector<GausCoeff>gCoeffs;
             for(unsigned int i = 0; i < gizmos.size(); i++){
-                Vertex mean = {(float)gizmos[i].getOrigin()[0], (float)gizmos[i].getOrigin()[1], (float)gizmos[i].getOrigin()[2]};
-                gCoeffs.push_back(GausCoeff(mean, 3));
-                listMatrix.push_back(gizmos[i].getMatrix());
+                gCoeffs.push_back(GausCoeff({(float)gizmos[i].getOrigin()[0], (float)gizmos[i].getOrigin()[1], (float)gizmos[i].getOrigin()[2]}, 1));
             }
             mesh.computeQis(gCoeffs);
         }
 
         else if (event->key() == Qt::Key_Y) {
+            std::vector<Eigen::MatrixXf> listMatrix;//TODO: make a struct with the gauscoeff
+            for(unsigned int i = 0; i < gizmos.size(); i++){
+                listMatrix.push_back(gizmos[i].getMatrix());
+            }
             mesh.transform(listMatrix);
             this->update();
 

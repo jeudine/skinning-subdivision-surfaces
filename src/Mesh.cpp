@@ -216,7 +216,6 @@ void Mesh::computeQis(const std::vector<GausCoeff>gCoeffs) {
     const unsigned int len_coeffs = coeffs.size();
     const unsigned int len_basic = basicVertices.size();
     const unsigned int len_gCoeffs = gCoeffs.size();
-
     //compute dp
     const unsigned int len_triangles = triangles.size();
     vector<float> dp(len_coeffs, 0);
@@ -269,7 +268,7 @@ void Mesh::computeQis(const std::vector<GausCoeff>gCoeffs) {
         C(0,j) = basicVertices[j][0];
         C(1,j) = basicVertices[j][1];
         C(2,j) = basicVertices[j][2];
-        C(3,j) = 1;
+        C(3,j) = 0;
     }
 
     for(unsigned int i = 0; i < len_gCoeffs; i++) {
@@ -283,6 +282,7 @@ void Mesh::transform(const vector<MatrixXf> & T) {
     for (unsigned int i = 0; i < T.size(); i++) {
         C += T[i]*Qis[i];
     }
+    cout << C << endl;
     for (unsigned int j = 0; j < len_basic; j++) {
         basicVertices[j] = Vertex(C(0,j), C(1,j), C(2,j));
     }
