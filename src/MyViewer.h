@@ -97,8 +97,8 @@ public :
                 // Depuis la classe quaterion on peut recuperer une rotation matrix avec getRotationMatrix(qreal m[3][3]) const
                 qreal rotationMatrix[3][3];
                 orientation.getRotationMatrix(rotationMatrix);
-                std::cout << "Orientation du frame: "<< orientation << std::endl;
-                std::cout << "Postion du frame: " << position << std::endl;
+                //std::cout << "Orientation du frame: "<< orientation << std::endl;
+                //std::cout << "Position du frame: " << position << std::endl;
                 gizmos[selectedGizmo].setTransfoMatrix(position, rotationMatrix);
                 glScalef(0.3f, 0.3f, 0.3f);
 
@@ -243,8 +243,19 @@ public :
             selectedGizmo ++;
             selectedGizmo = selectedGizmo % gizmos.size();
             setManipulatedFrame(gizmos[selectedGizmo].getFrame());
+            std::cout << "selected gizmo: " << selectedGizmo << std::endl;
         }
+        else if (event->key() == Qt::Key_D) {
+            if (!gizmos.empty()) {
+                gizmos.erase(gizmos.begin() + selectedGizmo);
+                if (selectedGizmo > 0) {
+                    selectedGizmo--;
+                }
+                setManipulatedFrame(gizmos[selectedGizmo].getFrame());
+                update();
+            }
 
+        }
     }
 
     void mouseDoubleClickEvent( QMouseEvent * e )
@@ -257,7 +268,7 @@ public :
 
         if( (e->modifiers() & Qt::ControlModifier)  &&  (e->button() == Qt::LeftButton) )
         {
-            showControls();
+            //showControls();
             return;
         }
 
