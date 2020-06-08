@@ -44,6 +44,7 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
     std::vector<Gizmo> gizmos;
     unsigned int selectedGizmo = 0;
     bool toTransform = false;
+    bool computedQi = false;
 
 
 public :
@@ -122,7 +123,7 @@ public :
 
             }
         }
-        if(toTransform){
+        if(toTransform && computedQi){
            transformMesh();
         }
 
@@ -251,6 +252,7 @@ public :
                 gCoeffs.push_back(GausCoeff({(float)gizmos[i].getOrigin()[0], (float)gizmos[i].getOrigin()[1], (float)gizmos[i].getOrigin()[2]}, 1));
             }
             mesh.computeQis(gCoeffs);
+            computedQi = true;
         }
 
         else if (event->key() == Qt::Key_Y) {
