@@ -43,13 +43,21 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
     QWidget * controls;
     std::vector<Gizmo> gizmos;
     unsigned int selectedGizmo = 0;
+    bool toTransform = false;
 
 
 public :
     MyViewer(QGLWidget * parent = NULL) : QGLViewer(parent) , QOpenGLFunctions_3_0() {
     }
 
-
+   void transformMesh(){
+       std::vector<Eigen::MatrixXf> listMatrix;//TODO: make a struct with the gauscoeff
+       for(unsigned int i = 0; i < gizmos.size(); i++){
+           listMatrix.push_back(gizmos[i].getMatrix());
+       }
+       mesh.transform(listMatrix);
+       this->update();
+   }
 
     void add_actions_to_toolBar(QToolBar *toolBar)
     {
@@ -114,7 +122,9 @@ public :
 
             }
         }
-
+        if(toTransform){
+           transformMesh();
+        }
 
 
         glEnd();
@@ -244,12 +254,7 @@ public :
         }
 
         else if (event->key() == Qt::Key_Y) {
-            std::vector<Eigen::MatrixXf> listMatrix;//TODO: make a struct with the gauscoeff
-            for(unsigned int i = 0; i < gizmos.size(); i++){
-                listMatrix.push_back(gizmos[i].getMatrix());
-            }
-            mesh.transform(listMatrix);
-            this->update();
+            transformMesh();
 
         }
         else if( event->key() == Qt::Key_U){
@@ -317,16 +322,27 @@ public :
             gizmos[selectedGizmo].setOrigin(point);
             setManipulatedFrame(gizmos[selectedGizmo].getFrame());
             manipulatedFrame()->setPosition(point);
+            toTransform = true;
+            return;
+        }
+        else if((e->modifiers() & Qt::ControlModifier)  &&  (e->button() == Qt::LeftButton or e->button()==Qt::RightButton)){
+            toTransform = true;
             return;
         }
     }
 
     void mouseMoveEvent(QMouseEvent* e  ){
         QGLViewer::mouseMoveEvent(e);
+
+
     }
 
     void mouseReleaseEvent(QMouseEvent* e  ) {
         QGLViewer::mouseReleaseEvent(e);
+        if((e->modifiers() & Qt::ControlModifier || e->modifiers() & Qt::AltModifier)  &&  (e->button() == Qt::LeftButton || e->button()==Qt::RightButton)){
+            toTransform = false;
+            return;
+        }
     }
 
 signals:
