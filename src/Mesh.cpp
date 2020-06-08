@@ -11,7 +11,6 @@ void Mesh::subdivide() {
     vector<Triangle> new_triangleIndices;
     vector<Uvec2> neighbours; //to know if the odd vertex already exists
     vector<Uvec2> neighbour_triangles; // to move odd vertices
-    vector<set <unsigned int> > neighbour_vertices; //to move even vertices
 
 
     map<unsigned int, vector <unsigned int>> even_n;
@@ -22,7 +21,7 @@ void Mesh::subdivide() {
     Triangle new_triangle;
 
     int triangle_count = 0;
-    neighbour_vertices.resize(len_vertices); //TODO cf computeQis
+    vector<set <unsigned int> > neighbour_vertices(len_vertices); //to move even vertices
 
     auto create_odd_vertex=[&](unsigned int & odd_vertex, unsigned int even_vertex1, unsigned int even_vertex2) -> void {
         unsigned int tmp;
@@ -69,8 +68,7 @@ void Mesh::subdivide() {
 
     // move
     std::vector< std::map< unsigned int, float > > old_coeffs = coeffs;
-    coeffs.clear(); //TODO cf computeQis
-    coeffs.resize(counter);
+    coeffs = vector<std::map< unsigned int, float > >(counter);
 
     auto addCoeff=[&](unsigned int vertex, coeff k) -> void {
         for(auto const & it : old_coeffs[k.vertex]) {
@@ -206,8 +204,7 @@ void Mesh::redisplay() {
 void Mesh::basicDisplay() {
     vertices = basicVertices;
     triangles = basicTriangles;
-    coeffs.clear(); // TODO modify cd computeQis
-    coeffs.resize(basicVertices.size());
+    coeffs = vector<std::map< unsigned int, float > >(basicVertices.size());
     for(unsigned int i = 0; i<basicVertices.size(); i++)
         coeffs[i][i] = 1.f;
 }
@@ -216,6 +213,7 @@ void Mesh::computeQis(const std::vector<GausCoeff>gCoeffs) {
     const unsigned int len_coeffs = coeffs.size();
     const unsigned int len_basic = basicVertices.size();
     const unsigned int len_gCoeffs = gCoeffs.size();
+
     //compute dp
     const unsigned int len_triangles = triangles.size();
     vector<float> dp(len_coeffs, 0);
