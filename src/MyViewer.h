@@ -235,15 +235,18 @@ public :
             }
         }
         else if (event->key() == Qt::Key_S) {
-            mesh.subdivide();
-            this->update();
+            if(computedQi) {
+                std::cout << "To change the level of subdivision, please reset the mesh, by pressing 'R'!" <<std::endl;
+            } else {
+                mesh.subdivide();
+                this->update();
+            }
         }
+
         else if (event->key() == Qt::Key_R) {
-            mesh.redisplay();
-            this->update();
-        }
-        else if (event->key() == Qt::Key_B) {
-            mesh.basicDisplay();
+            computedQi = false;
+            mesh.reset();
+            //TODO: remove the guizmos
             this->update();
         }
         else if (event->key() == Qt::Key_C) {
@@ -253,12 +256,9 @@ public :
             }
             mesh.computeQis(gCoeffs);
             computedQi = true;
-        }
-
-        else if (event->key() == Qt::Key_Y) {
             transformMesh();
-
         }
+
         else if( event->key() == Qt::Key_U){
             selectedGizmo ++;
             selectedGizmo = selectedGizmo % gizmos.size();
@@ -367,6 +367,7 @@ signals:
                 }
                 if(success) {
                     mesh.basicVertices = mesh.vertices;
+                    mesh.resetVertices = mesh.vertices;
                     mesh.basicTriangles = mesh.triangles;
                     mesh.coeffs.resize(mesh.vertices.size());
                     for(unsigned int i = 0; i<mesh.vertices.size(); i++)

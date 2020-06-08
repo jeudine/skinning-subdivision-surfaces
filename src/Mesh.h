@@ -72,14 +72,14 @@ struct GausCoeff {
 struct Mesh{
     std::vector< Vertex > vertices;
     std::vector< Vertex > basicVertices;
+    std::vector< Vertex > resetVertices;
     std::vector< Triangle > triangles;
     std::vector< Triangle > basicTriangles;
     std::vector< std::map< unsigned int, float > > coeffs;
     std::vector<Eigen::MatrixXf> Qis;
 
     void subdivide();
-    void redisplay(); //TODO: integrate this function into transform
-    void basicDisplay();
+    void reset();
     void computeQis(const std::vector<GausCoeff>);
     void transform(const std::vector<Eigen::MatrixXf> & T);
     void transform_Basic(const std::vector<Eigen::MatrixXf> & T, const std::vector<GausCoeff>gCoeffs);

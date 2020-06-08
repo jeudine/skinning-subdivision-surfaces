@@ -189,20 +189,8 @@ void Mesh::subdivide() {
     triangles = new_triangleIndices;
 }
 
-void Mesh::redisplay() {
-    unsigned int n = coeffs.size();
-    Vertex tmp;
-    for(unsigned int i = 0; i < n; i++) {
-        tmp = {0, 0, 0};
-        for (auto const & it : coeffs[i]) {
-            tmp += it.second * basicVertices[it.first];
-        }
-        vertices[i] = tmp;
-    }
-}
-
-void Mesh::basicDisplay() {
-    vertices = basicVertices;
+void Mesh::reset() {
+    vertices = resetVertices;
     triangles = basicTriangles;
     coeffs = vector<std::map< unsigned int, float > >(basicVertices.size());
     for(unsigned int i = 0; i<basicVertices.size(); i++)
