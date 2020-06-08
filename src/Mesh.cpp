@@ -275,19 +275,19 @@ void Mesh::computeQis(const std::vector<GausCoeff>gCoeffs) {
 
     for(unsigned int i = 0; i < len_gCoeffs; i++) {
         Qis[i] = C  * tis[i] * A_1;
-        cout << Qis[i] << endl;
+        //cout << Qis[i] << endl;
     }
 }
 
 void Mesh::transform(const vector<MatrixXf> & T) {
     unsigned int len_basic = basicVertices.size();
-    cout << T[1] << endl;
-    cout << T[0] << endl;
+    //cout << T[1] << endl;
+    //cout << T[0] << endl;
     Eigen::MatrixXf C = MatrixXf::Zero(4, len_basic);
     for (unsigned int i = 0; i < T.size(); i++) {
         C += T[i]*Qis[i];
     }
-    cout << C << endl;
+    //cout << C << endl;
     for (unsigned int j = 0; j < len_basic; j++) {
         basicVertices[j] = Vertex(C(0,j), C(1,j), C(2,j));
     }
