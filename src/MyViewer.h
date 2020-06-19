@@ -1,3 +1,4 @@
+//TODO: when pressing C when there is no Guizmo
 #ifndef MYVIEWER_H
 #define MYVIEWER_H
 
@@ -38,27 +39,41 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
 {
     Q_OBJECT
 
-    Mesh mesh;
+        Mesh mesh;
     Gizmo gizmo;
     QWidget * controls;
     std::vector<Gizmo> gizmos;
     unsigned int selectedGizmo = 0;
     bool toTransform = false;
     bool computedQi = false;
+    bool Mode       = true; //switch between basic transformation and the fancy one
 
 
-public :
+    public :
     MyViewer(QGLWidget * parent = NULL) : QGLViewer(parent) , QOpenGLFunctions_3_0() {
     }
 
-   void transformMesh(){
-       std::vector<Eigen::MatrixXf> listMatrix;//TODO: make a struct with the gauscoeff
-       for(unsigned int i = 0; i < gizmos.size(); i++){
-           listMatrix.push_back(gizmos[i].getMatrix());
-       }
-       mesh.transform(listMatrix);
-       this->update();
-   }
+    void transformMesh(){
+        std::vector<Eigen::MatrixXf> listMatrix;//TODO: make a struct with the gauscoeff
+        for(unsigned int i = 0; i < gizmos.size(); i++){
+            listMatrix.push_back(gizmos[i].getMatrix());
+        }
+        mesh.transform(listMatrix);
+    }
+
+    void transformBasicMesh() {
+        //TODO: to modify for do iit one time
+        std::vector<Eigen::MatrixXf> listMatrix;//TODO: make a struct with the gauscoeff
+        for(unsigned int i = 0; i < gizmos.size(); i++){
+            listMatrix.push_back(gizmos[i].getMatrix());
+        }
+        std::vector<GausCoeff>gCoeffs;
+        for(unsigned int i = 0; i < gizmos.size(); i++){
+            gCoeffs.push_back(GausCoeff({(float)gizmos[i].getOrigin()[0], (float)gizmos[i].getOrigin()[1], (float)gizmos[i].getOrigin()[2]}, 1));
+        }
+
+        mesh.transform_Basic(listMatrix, gCoeffs);
+    }
 
     void add_actions_to_toolBar(QToolBar *toolBar)
     {
@@ -81,6 +96,14 @@ public :
 
 
     void draw() {
+
+        if(toTransform && computedQi){
+            if(Mode) {
+                transformMesh();
+            } else
+                transformBasicMesh();
+        }
+
         glEnable(GL_DEPTH_TEST);
         glEnable( GL_LIGHTING );
         glColor3f(0.5,0.5,0.8);
@@ -123,10 +146,6 @@ public :
 
             }
         }
-        if(toTransform && computedQi){
-           transformMesh();
-        }
-
 
         glEnd();
     }
@@ -188,8 +207,8 @@ public :
         QString text("<h2>Skinning Subdivision Surfaces</h2>");
         text += "<p>";
         text += "This is a research application, it can explode. "
-                "This project aims to optimize in real time the deformations of control points "
-                "in order to obtain a smooth and intuitively animated subdivision surface.";
+            "This project aims to optimize in real time the deformations of control points "
+            "in order to obtain a smooth and intuitively animated subdivision surface.";
         text += "<h3>Supervisor</h3>";
         text += "<ul>";
         text += "<li>Jean-Marc THIERY</li>";
@@ -249,6 +268,7 @@ public :
             //TODO: remove the guizmos
             this->update();
         }
+
         else if (event->key() == Qt::Key_C) {
             std::vector<GausCoeff>gCoeffs;
             for(unsigned int i = 0; i < gizmos.size(); i++){
@@ -257,6 +277,7 @@ public :
             mesh.computeQis(gCoeffs);
             computedQi = true;
             transformMesh();
+            this->update();
         }
 
         else if( event->key() == Qt::Key_U){
@@ -266,17 +287,22 @@ public :
             std::cout << "selected gizmo: " << selectedGizmo << std::endl;
         }
 
-        else if( event->key() == Qt::Key_A){
-            std::vector<Eigen::MatrixXf> listMatrix;//TODO: make a struct with the gauscoeff
-            for(unsigned int i = 0; i < gizmos.size(); i++){
-                listMatrix.push_back(gizmos[i].getMatrix());
-            }
-            std::vector<GausCoeff>gCoeffs;
-            for(unsigned int i = 0; i < gizmos.size(); i++){
-                gCoeffs.push_back(GausCoeff({(float)gizmos[i].getOrigin()[0], (float)gizmos[i].getOrigin()[1], (float)gizmos[i].getOrigin()[2]}, 1));
+        else if( event->key() == Qt::Key_M){
+            if(!computedQi)
+                std::cout << "Before changing Mode and to allow the drawing please press 'C' to compute the constant matrix" << std::endl;
+            else {
+                if((Mode = !Mode)) {
+                    std::cout << "Switched to the optimized transformation preserving the loop subdivision" << std::endl;
+                    transformMesh();
+
+                }
+                else {
+                    std::cout << "Switched to the basic transformation" << std::endl;
+                    transformBasicMesh();
+                }
+                this->update();
             }
 
-            mesh.transform_Basic(listMatrix, gCoeffs);
         }
         else if (event->key() == Qt::Key_D) {
             if (!gizmos.empty()) {

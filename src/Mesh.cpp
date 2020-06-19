@@ -187,6 +187,7 @@ void Mesh::subdivide() {
     }
     vertices.insert(vertices.end(), odd_vertexPositions.begin(), odd_vertexPositions.end());
     triangles = new_triangleIndices;
+    vertices_no = vertices;
 }
 
 void Mesh::reset() {
@@ -294,10 +295,10 @@ void Mesh::transform_Basic(const vector<MatrixXf> & T, const std::vector<GausCoe
         Eigen::VectorXf tmp = Eigen::VectorXf::Zero(4);
         float normWis = 0;
         for(unsigned int i = 0; i < len_gCoeffs; i++) {
-            wis = exp(-(vertices[k] - gCoeffs[i].mean).sqrnorm()/(2*gCoeffs[i].variance));
+            wis = exp(-(vertices_no[k] - gCoeffs[i].mean).sqrnorm()/(2*gCoeffs[i].variance));
             normWis += wis;
             for(unsigned int j = 0; j<3; j++)
-                tmp_e(j) = vertices[k][j];
+                tmp_e(j) = vertices_no[k][j];
             tmp_e(3) = 1;
             tmp += wis * T[i] * tmp_e;
         }
