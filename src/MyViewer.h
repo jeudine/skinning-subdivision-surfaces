@@ -1,4 +1,3 @@
-//TODO: when pressing C when there is no Guizmo
 #ifndef MYVIEWER_H
 #define MYVIEWER_H
 
@@ -54,7 +53,7 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
     }
 
     void transformMesh(){
-        std::vector<Eigen::MatrixXf> listMatrix;//TODO: make a struct with the gauscoeff
+        std::vector<Eigen::MatrixXf> listMatrix;
         for(unsigned int i = 0; i < gizmos.size(); i++){
             listMatrix.push_back(gizmos[i].getMatrix());
         }
@@ -62,13 +61,10 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
     }
 
     void transformBasicMesh() {
-        //TODO: to modify for do iit one time
-        std::vector<Eigen::MatrixXf> listMatrix;//TODO: make a struct with the gauscoeff
-        for(unsigned int i = 0; i < gizmos.size(); i++){
-            listMatrix.push_back(gizmos[i].getMatrix());
-        }
+        std::vector<Eigen::MatrixXf> listMatrix;
         std::vector<GausCoeff>gCoeffs;
         for(unsigned int i = 0; i < gizmos.size(); i++){
+            listMatrix.push_back(gizmos[i].getMatrix());
             gCoeffs.push_back(GausCoeff({(float)gizmos[i].getOrigin()[0], (float)gizmos[i].getOrigin()[1], (float)gizmos[i].getOrigin()[2]}, 1));
         }
 
@@ -137,8 +133,6 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
                 // Depuis la classe quaterion on peut recuperer une rotation matrix avec getRotationMatrix(qreal m[3][3]) const
                 qreal rotationMatrix[3][3];
                 orientation.getRotationMatrix(rotationMatrix);
-                //std::cout << "Orientation du frame: "<< orientation << std::endl;
-                //std::cout << "Position du frame: " << position << std::endl;
                 gizmos[selectedGizmo].setTransfoMatrix(position, rotationMatrix);
                 glScalef(0.3f, 0.3f, 0.3f);
 
@@ -198,8 +192,6 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
         glEnable(GL_CLIP_PLANE0);
 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        glEnable(GL_COLOR_MATERIAL);
 
         //
 
@@ -277,6 +269,15 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
         }
 
         else if (event->key() == Qt::Key_C) {
+            if(computedQi) {
+                std::cout << "Constant matrixes already computed!" << std::endl;
+                return;
+            }
+
+            if(!gizmos.size()) {
+                std::cout << "Please add some gizmos, before computing the constant matrixes!" << std::endl;
+                return;
+            }
             std::vector<GausCoeff>gCoeffs;
             for(unsigned int i = 0; i < gizmos.size(); i++){
                 gCoeffs.push_back(GausCoeff({(float)gizmos[i].getOrigin()[0], (float)gizmos[i].getOrigin()[1], (float)gizmos[i].getOrigin()[2]}, 1));
@@ -312,6 +313,11 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
 
         }
         else if (event->key() == Qt::Key_D) {
+            if (computedQi) {
+                std::cout << "You have already computed the constant matrixes, you can not remove any gizmo." << std::endl;
+                std::cout << "If you want to reset the mesh, please press 'R'." << std::endl;
+                return;
+            }
             if (!gizmos.empty()) {
                 gizmos.erase(gizmos.begin() + selectedGizmo);
                 if (selectedGizmo > 0) {
