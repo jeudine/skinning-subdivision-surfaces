@@ -188,20 +188,29 @@ void Mesh::subdivide() {
     vertices.insert(vertices.end(), odd_vertexPositions.begin(), odd_vertexPositions.end());
     triangles = new_triangleIndices;
     vertices_no = vertices;
+    colors = std::vector<float[3]> (vertices.size());
+    for(unsigned int i = 0; i<vertices.size(); i++)
+        for(unsigned int k = 0; k<3; k++)
+            colors[i][k] = 0.7;
 }
 
 void Mesh::reset() {
     vertices = resetVertices;
     triangles = basicTriangles;
     coeffs = vector<std::map< unsigned int, float > >(basicVertices.size());
-    for(unsigned int i = 0; i<basicVertices.size(); i++)
+    colors = vector<float[3]>(basicVertices.size());
+    for(unsigned int i = 0; i<basicVertices.size(); i++) {
         coeffs[i][i] = 1.f;
+        for (unsigned int j = 0; j<3; j++)
+            colors[i][j] = 0.7;
+    }
 }
 
 void Mesh::computeQis(const std::vector<GausCoeff>gCoeffs) {
     const unsigned int len_coeffs = coeffs.size();
     const unsigned int len_basic = basicVertices.size();
     const unsigned int len_gCoeffs = gCoeffs.size();
+
 
     //compute dp
     const unsigned int len_triangles = triangles.size();
@@ -239,9 +248,16 @@ void Mesh::computeQis(const std::vector<GausCoeff>gCoeffs) {
             }
             Ap.insert(i.first, i.first) = i.second * i.second;
         }
+        if(len_gCoeffs > 1) {
+            colors[k][0] = 0;
+            colors[k][1] = 0;
+            colors[k][2] = 0;
+        }
         for(unsigned int i = 0; i < len_gCoeffs; i++) {
             wis[i] = exp(-(vertices[k] - gCoeffs[i].mean).sqrnorm()/(2*gCoeffs[i].variance));
             normWis += wis[i];
+            if(len_gCoeffs > 1)
+                colors[k][i%3] += wis[i];
         }
         for(unsigned int i = 0; i < len_gCoeffs; i++) {
             tis[i] += wis[i]/normWis * dp[k] * Ap;

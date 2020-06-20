@@ -78,6 +78,7 @@ struct Mesh{
     std::vector< Triangle > basicTriangles;
     std::vector< std::map< unsigned int, float > > coeffs;
     std::vector<Eigen::MatrixXf> Qis;
+    std::vector<float[3]> colors;
 
     void subdivide();
     void reset();

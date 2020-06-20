@@ -106,13 +106,21 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
 
         glEnable(GL_DEPTH_TEST);
         glEnable( GL_LIGHTING );
-        glColor3f(0.5,0.5,0.8);
+        glColorMaterial ( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE ) ;
+        glEnable ( GL_COLOR_MATERIAL ) ;
         glBegin(GL_TRIANGLES);
+        glDisable( GL_TEXTURE_2D );
         for( unsigned int t = 0 ; t < mesh.triangles.size() ; ++t ) {
             point3d const & p0 = mesh.vertices[ mesh.triangles[t][0] ].p;
             point3d const & p1 = mesh.vertices[ mesh.triangles[t][1] ].p;
             point3d const & p2 = mesh.vertices[ mesh.triangles[t][2] ].p;
             point3d const & n = point3d::cross( p1-p0 , p2-p0 ).direction();
+            float * colors1 = mesh.colors[mesh.triangles[t][0]];
+            float * colors2 = mesh.colors[mesh.triangles[t][1]];
+            float * colors3 = mesh.colors[mesh.triangles[t][2]];
+            glColor3f((colors1[0] + colors2[0] + colors3[0])/3.0,
+                    (colors1[1] + colors2[1] + colors3[1])/3.0,
+                    (colors1[2] + colors2[2] + colors3[2])/3.0);
             glNormal3f(n[0],n[1],n[2]);
             glVertex3f(p0[0],p0[1],p0[2]);
             glVertex3f(p1[0],p1[1],p1[2]);
@@ -265,7 +273,6 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
         else if (event->key() == Qt::Key_R) {
             computedQi = false;
             mesh.reset();
-            //TODO: remove the guizmos
             this->update();
         }
 
@@ -395,9 +402,13 @@ signals:
                     mesh.basicVertices = mesh.vertices;
                     mesh.resetVertices = mesh.vertices;
                     mesh.basicTriangles = mesh.triangles;
-                    mesh.coeffs.resize(mesh.vertices.size());
-                    for(unsigned int i = 0; i<mesh.vertices.size(); i++)
+                    mesh.coeffs = std::vector<std::map< unsigned int, float > >(mesh.vertices.size());
+                    mesh.colors = std::vector<float[3]> (mesh.vertices.size());
+                    for(unsigned int i = 0; i<mesh.vertices.size(); i++) {
                         mesh.coeffs[i][i] = 1;
+                        for(unsigned int k = 0; k<3; k++)
+                            mesh.colors[i][k] = 0.7;
+                    }
                     std::cout << fileName.toStdString() << " was opened successfully" << std::endl;
                     point3d bb(FLT_MAX,FLT_MAX,FLT_MAX) , BB(-FLT_MAX,-FLT_MAX,-FLT_MAX);
                     for( unsigned int v = 0 ; v < mesh.vertices.size() ; ++v ) {
