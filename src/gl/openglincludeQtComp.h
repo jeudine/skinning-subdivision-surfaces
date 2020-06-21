@@ -34,6 +34,7 @@ inline int t__GetOpenGLError ( char* szFile, int iLine )
 
 #define printOpenGLError() printOglError(__FILE__, __LINE__)
 
+/*
 /// Returns 1 if an OpenGL error occurred, 0 otherwise.
 static int printOglError (const char * file, int line) {
     GLenum glErr;
@@ -46,6 +47,7 @@ static int printOglError (const char * file, int line) {
     }
     return retCode;
 }
+*/
 
 
 

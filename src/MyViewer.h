@@ -52,8 +52,8 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
 
     void transformMesh(){
         std::vector<Eigen::MatrixXf> listMatrix;
-        for(unsigned int i = 0; i < gizmos.size(); i++){
-            listMatrix.push_back(gizmos[i]->getMatrix());
+        for(const Gizmo * const gizmo : gizmos){
+            listMatrix.push_back(gizmo->getMatrix());
         }
         mesh.transform(listMatrix);
     }
@@ -61,9 +61,9 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
     void transformBasicMesh() {
         std::vector<Eigen::MatrixXf> listMatrix;
         std::vector<GausCoeff>gCoeffs;
-        for(unsigned int i = 0; i < gizmos.size(); i++){
-            listMatrix.push_back(gizmos[i]->getMatrix());
-            gCoeffs.push_back(GausCoeff({(float)gizmos[i]->getOrigin()[0], (float)gizmos[i]->getOrigin()[1], (float)gizmos[i]->getOrigin()[2]}, 1));
+        for(const Gizmo * const gizmo : gizmos){
+            listMatrix.push_back(gizmo->getMatrix());
+            gCoeffs.push_back(GausCoeff({(float)gizmo->getOrigin()[0], (float)gizmo->getOrigin()[1], (float)gizmo->getOrigin()[2]}, 1));
         }
 
         mesh.transform_Basic(listMatrix, gCoeffs);
@@ -121,15 +121,15 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
             glVertex3f(p2[0],p2[1],p2[2]);
         }
         drawAxis(0.001);
-        for(unsigned int i = 0; i < gizmos.size(); i++){
+        for(Gizmo * const gizmo : gizmos){
             glPushMatrix();
-            glMultMatrixd(gizmos[i]->getFrame()->matrix());
-            if(gizmos[i]->getFrame()->grabsMouse()){
-                qglviewer::Vec position = gizmos[i]->getFrame()->position();
-                qglviewer::Quaternion orientation = gizmos[i]->getFrame()->orientation();
+            glMultMatrixd(gizmo->getFrame()->matrix());
+            if(gizmo->getFrame()->grabsMouse()){
+                qglviewer::Vec position = gizmo->getFrame()->position();
+                qglviewer::Quaternion orientation = gizmo->getFrame()->orientation();
                 qreal rotationMatrix[3][3];
                 orientation.getRotationMatrix(rotationMatrix);
-                gizmos[i]->setTransfoMatrix(position, rotationMatrix);
+                gizmo->setTransfoMatrix(position, rotationMatrix);
 
                 drawAxis(0.5f);
                 glPopMatrix();
@@ -269,8 +269,8 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
                 return;
             }
             std::vector<GausCoeff>gCoeffs;
-            for(unsigned int i = 0; i < gizmos.size(); i++){
-                gCoeffs.push_back(GausCoeff({(float)gizmos[i]->getOrigin()[0], (float)gizmos[i]->getOrigin()[1], (float)gizmos[i]->getOrigin()[2]}, 1));
+            for(const Gizmo * const gizmo : gizmos){
+                gCoeffs.push_back(GausCoeff({(float)gizmo->getOrigin()[0], (float)gizmo->getOrigin()[1], (float)gizmo->getOrigin()[2]}, 1));
             }
             mesh.computeQis(gCoeffs);
             computedQi = true;

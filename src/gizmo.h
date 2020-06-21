@@ -15,7 +15,7 @@ class Gizmo{
 
     public:
 
-    qglviewer::ManipulatedFrame* getFrame(){
+    qglviewer::ManipulatedFrame* getFrame() const {
         return frame;
     }
 
@@ -24,11 +24,11 @@ class Gizmo{
         frame->setPosition(origin);
     }
 
-    qglviewer::Vec getOrigin(){
+    qglviewer::Vec getOrigin() const{
         return this->origin;
     }
 
-    Eigen::MatrixXf getMatrix(){
+    Eigen::MatrixXf getMatrix() const {
         return transforMatrix;
     }
 
