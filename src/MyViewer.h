@@ -31,7 +31,6 @@
 
 
 #include "qt/QSmartAction.h"
-#include <QGLViewer/manipulatedFrame.h>
 #include "gizmo.h"
 
 class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
@@ -40,8 +39,7 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
 
         Mesh mesh;
     Gizmo gizmo;
-    QWidget * controls;
-    std::vector<Gizmo> gizmos;
+    std::vector<Gizmo *> gizmos;
     unsigned int selectedGizmo = 0;
     bool toTransform = false;
     bool computedQi = false;
@@ -55,7 +53,7 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
     void transformMesh(){
         std::vector<Eigen::MatrixXf> listMatrix;
         for(unsigned int i = 0; i < gizmos.size(); i++){
-            listMatrix.push_back(gizmos[i].getMatrix());
+            listMatrix.push_back(gizmos[i]->getMatrix());
         }
         mesh.transform(listMatrix);
     }
@@ -64,8 +62,8 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
         std::vector<Eigen::MatrixXf> listMatrix;
         std::vector<GausCoeff>gCoeffs;
         for(unsigned int i = 0; i < gizmos.size(); i++){
-            listMatrix.push_back(gizmos[i].getMatrix());
-            gCoeffs.push_back(GausCoeff({(float)gizmos[i].getOrigin()[0], (float)gizmos[i].getOrigin()[1], (float)gizmos[i].getOrigin()[2]}, 1));
+            listMatrix.push_back(gizmos[i]->getMatrix());
+            gCoeffs.push_back(GausCoeff({(float)gizmos[i]->getOrigin()[0], (float)gizmos[i]->getOrigin()[1], (float)gizmos[i]->getOrigin()[2]}, 1));
         }
 
         mesh.transform_Basic(listMatrix, gCoeffs);
@@ -122,30 +120,23 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
             glVertex3f(p1[0],p1[1],p1[2]);
             glVertex3f(p2[0],p2[1],p2[2]);
         }
-        drawAxis();
+        drawAxis(0.001);
         for(unsigned int i = 0; i < gizmos.size(); i++){
             glPushMatrix();
-            if(i == selectedGizmo){
-                glMultMatrixd(manipulatedFrame()->matrix());
-
-                qglviewer::Vec position = manipulatedFrame()->position();
-                qglviewer::Quaternion orientation = manipulatedFrame()->orientation();
-                // Depuis la classe quaterion on peut recuperer une rotation matrix avec getRotationMatrix(qreal m[3][3]) const
+            glMultMatrixd(gizmos[i]->getFrame()->matrix());
+            if(gizmos[i]->getFrame()->grabsMouse()){
+                qglviewer::Vec position = gizmos[i]->getFrame()->position();
+                qglviewer::Quaternion orientation = gizmos[i]->getFrame()->orientation();
                 qreal rotationMatrix[3][3];
                 orientation.getRotationMatrix(rotationMatrix);
-                gizmos[selectedGizmo].setTransfoMatrix(position, rotationMatrix);
-                glScalef(0.3f, 0.3f, 0.3f);
+                gizmos[i]->setTransfoMatrix(position, rotationMatrix);
 
-                drawAxis();
+                drawAxis(0.5f);
                 glPopMatrix();
             }
             else{
-                glMultMatrixd(gizmos[i].getFrame()->matrix());
-                glScalef(0.3f, 0.3f, 0.3f);
-
-                drawAxis();
+                drawAxis(0.3f);
                 glPopMatrix();
-
             }
         }
 
@@ -195,7 +186,6 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
 
         //
 
-        setManipulatedFrame(new qglviewer::ManipulatedFrame());
 
 
         setSceneCenter( qglviewer::Vec( 0 , 0 , 0 ) );
@@ -280,19 +270,12 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
             }
             std::vector<GausCoeff>gCoeffs;
             for(unsigned int i = 0; i < gizmos.size(); i++){
-                gCoeffs.push_back(GausCoeff({(float)gizmos[i].getOrigin()[0], (float)gizmos[i].getOrigin()[1], (float)gizmos[i].getOrigin()[2]}, 1));
+                gCoeffs.push_back(GausCoeff({(float)gizmos[i]->getOrigin()[0], (float)gizmos[i]->getOrigin()[1], (float)gizmos[i]->getOrigin()[2]}, 1));
             }
             mesh.computeQis(gCoeffs);
             computedQi = true;
             transformMesh();
             this->update();
-        }
-
-        else if( event->key() == Qt::Key_U){
-            selectedGizmo ++;
-            selectedGizmo = selectedGizmo % gizmos.size();
-            setManipulatedFrame(gizmos[selectedGizmo].getFrame());
-            std::cout << "selected gizmo: " << selectedGizmo << std::endl;
         }
 
         else if( event->key() == Qt::Key_M){
@@ -317,13 +300,12 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
                 std::cout << "You have already computed the constant matrixes, you can not remove any gizmo." << std::endl;
                 std::cout << "If you want to reset the mesh, please press 'R'." << std::endl;
                 return;
-            }
-            if (!gizmos.empty()) {
-                gizmos.erase(gizmos.begin() + selectedGizmo);
-                if (selectedGizmo > 0) {
-                    selectedGizmo--;
+            } else {
+                for(unsigned int i = 0; i < gizmos.size(); i++){
+                    if(gizmos[i]->getFrame()->grabsMouse()){
+                        gizmos.erase(gizmos.begin() + i);
+                    }
                 }
-                setManipulatedFrame(gizmos[selectedGizmo].getFrame());
                 update();
             }
 
@@ -338,37 +320,22 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
             return;
         }
 
-        if( (e->modifiers() & Qt::ControlModifier)  &&  (e->button() == Qt::LeftButton) )
-        {
-            //showControls();
-            return;
-        }
-
         QGLViewer::mouseDoubleClickEvent( e );
     }
 
     void mousePressEvent(QMouseEvent* e ) {
         QGLViewer::mousePressEvent(e);
+        toTransform = true;
         bool found;
         if( (e->modifiers() & Qt::AltModifier)  &&  (e->button() == Qt::LeftButton) )
         {
+            if(computedQi) {
+                std::cout << "If you want to add a gizmo, please reset the mesh by pressing 'R'" << std::endl;
+                return;
+            }
             qglviewer::Vec point = camera()->pointUnderPixel(e->pos(), found);
-            //Avant multi gizmo
-            /*manipulatedFrame()->setPosition(point);
-              gizmo.setOrigin(point);*/
-
-            //Avec multi gizmo
-            gizmos.push_back(Gizmo());
-            selectedGizmo = gizmos.size() - 1;
-            gizmos[selectedGizmo].setOrigin(point);
-            setManipulatedFrame(gizmos[selectedGizmo].getFrame());
-            manipulatedFrame()->setPosition(point);
-            toTransform = true;
-            return;
-        }
-        else if((e->modifiers() & Qt::ControlModifier)  &&  (e->button() == Qt::LeftButton or e->button()==Qt::RightButton)){
-            toTransform = true;
-            return;
+            gizmos.push_back(new Gizmo());
+            gizmos.back()->setOrigin(point);
         }
     }
 
@@ -444,12 +411,6 @@ signals:
         }
     }
 
-    void showControls()
-    {
-        // Show controls :
-        controls->close();
-        controls->show();
-    }
 
     void saveCameraInFile(const QString &filename){
         std::ofstream out (filename.toUtf8());
@@ -515,8 +476,4 @@ signals:
         }
     }
 };
-
-
-
-
 #endif // MYVIEWER_H

@@ -14,6 +14,7 @@ HEADERS += ./src/point3.h \
     ./src/MyViewer.h \
     ./src/gl/GLUtilityMethods.h \
     ./src/gl/BasicColors.h
+    ./src/gizmo.h
 SOURCES += ./src/main.cpp \
     ./src/gl/GLUtilityMethods.cpp\
     ./src/gl/BasicColors.cpp\

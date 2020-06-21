@@ -4,13 +4,16 @@
 #include <QGLViewer/vec.h>
 #include <eigen3/Eigen/SparseCore>
 #include <QGLViewer/qglviewer.h>
+#include <QGLViewer/manipulatedFrame.h>
 
 
 class Gizmo{
-public:
+
+    qglviewer::ManipulatedFrame* frame;
     qglviewer::Vec origin;
     Eigen::MatrixXf transforMatrix;
-    qglviewer::ManipulatedFrame* frame;
+
+    public:
 
     qglviewer::ManipulatedFrame* getFrame(){
         return frame;
@@ -18,6 +21,7 @@ public:
 
     void setOrigin(qglviewer::Vec origin){
         this->origin = origin;
+        frame->setPosition(origin);
     }
 
     qglviewer::Vec getOrigin(){
@@ -57,6 +61,10 @@ public:
         this->frame =  new qglviewer::ManipulatedFrame();
         this->transforMatrix.resize(4,4);
         this->origin = qglviewer::Vec(0,0,0);
+    }
+
+    ~Gizmo(){
+        delete frame;
     }
 };
 
