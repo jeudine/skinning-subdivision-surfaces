@@ -34,11 +34,11 @@ To move a manipulated frame you only need to select it by hover your mouse over 
 
 
 ## Images
-### Original tree after 4 subdivision
+### Original mesh after 4 subdivisions
 ![origninal](./images/original.png)
 
 
-### Our optimized transformation applied on the previous mesh
+### The optimized transformation applied on the previous mesh
 ![optimized](./images/optimized.png)
 
 
