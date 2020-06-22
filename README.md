@@ -40,6 +40,9 @@ Press **d** to delete the selected manipulated frame.
 
 To move a manipulated frame you only need to select it by hover your mouse over it, and then press the **left button** to turn the frame or press the **right button** to translate it.
 
+## Resources
+
+You can find some examples of meshes which work fine with this method in the `res/` directory.
 
 ## Images
 ### Original mesh after 4 subdivisions
