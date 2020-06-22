@@ -1,5 +1,5 @@
 .qmake.stash
 Makefile
 tmp/*
-myProject
+demonstrator
 extern/libQGLViewer-2.6.1/*
