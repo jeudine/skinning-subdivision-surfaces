@@ -212,13 +212,16 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
         text += "<h3>Basics</h3>";
         text += "<p>";
         text += "<ul>";
-        text += "<li>H   :   make this help appear</li>";
-        text += "<li>Ctrl + mouse right button double click   :   choose background color</li>";
-        text += "<li>Ctrl + T   :   change window title</li>";
+        text += "<li>H   :   Make this help appear</li>";
+        text += "<li>Ctrl + mouse right button double click   :   Choose background color</li>";
+        text += "<li>Ctrl + T   :   Change window title</li>";
         text += "<li>S   :   Subdivide the mesh with the Loop subdivision</li>";
-        text += "<li>R   :   Redisplay the shape using the control points weights and the control points</li>";
-        text += "<li>B   :   Display the basic mesh</li>";
-        text += "<li>U   : Change the selected gizmo</li>";
+        text += "<li>R   :   Reset the mesh</li>";
+        text += "<li>C   :   Compute the constant matrixes to allow the transformation</li>";
+        text += "<li>M   :   Change the display mode, either 'Target transformation' or 'Optimized transformation'</li>";
+        text += "<li>Alt + mouse left button press   :   Add a new manipulated frame</li>";
+        text += "<li>D   :   Delete the manupulated frame'</li>";
+        text += "<li>To move a manipulated frame you only need to select it by hover your mouse over it, and then press the left button to turn the frame or press the right button to translate it.";
         text += "</ul>";
         return text;
     }
