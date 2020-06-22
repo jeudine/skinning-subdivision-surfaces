@@ -72,7 +72,7 @@ struct GausCoeff {
 struct Mesh{
     std::vector< Vertex > vertices;
     std::vector< Vertex > vertices_no;
-    std::vector< Vertex > basicVertices;
+    std::vector< Vertex > controlVertices;
     std::vector< Vertex > resetVertices;
     std::vector< Triangle > triangles;
     std::vector< Triangle > basicTriangles;

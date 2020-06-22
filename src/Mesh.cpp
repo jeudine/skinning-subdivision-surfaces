@@ -196,10 +196,12 @@ void Mesh::subdivide() {
 
 void Mesh::reset() {
     vertices = resetVertices;
+    vertices_no = resetVertices;
+    controlVertices = resetVertices;
     triangles = basicTriangles;
-    coeffs = vector<std::map< unsigned int, float > >(basicVertices.size());
-    colors = vector<float[3]>(basicVertices.size());
-    for(unsigned int i = 0; i<basicVertices.size(); i++) {
+    coeffs = vector<std::map< unsigned int, float > >(controlVertices.size());
+    colors = vector<float[3]>(controlVertices.size());
+    for(unsigned int i = 0; i<controlVertices.size(); i++) {
         coeffs[i][i] = 1.f;
         for (unsigned int j = 0; j<3; j++)
             colors[i][j] = 0.7;
@@ -208,7 +210,7 @@ void Mesh::reset() {
 
 void Mesh::computeQis(const std::vector<GausCoeff>gCoeffs) {
     const unsigned int len_coeffs = coeffs.size();
-    const unsigned int len_basic = basicVertices.size();
+    const unsigned int len_basic = controlVertices.size();
     const unsigned int len_gCoeffs = gCoeffs.size();
 
 
@@ -270,9 +272,9 @@ void Mesh::computeQis(const std::vector<GausCoeff>gCoeffs) {
     MatrixXf C(4, len_basic);
 
     for(unsigned int j = 0; j < len_basic; j++) {
-        C(0,j) = basicVertices[j][0];
-        C(1,j) = basicVertices[j][1];
-        C(2,j) = basicVertices[j][2];
+        C(0,j) = controlVertices[j][0];
+        C(1,j) = controlVertices[j][1];
+        C(2,j) = controlVertices[j][2];
         C(3,j) = 1;
     }
 
@@ -282,20 +284,20 @@ void Mesh::computeQis(const std::vector<GausCoeff>gCoeffs) {
 }
 
 void Mesh::transform(const vector<MatrixXf> & T) {
-    unsigned int len_basic = basicVertices.size();
+    unsigned int len_basic = controlVertices.size();
     Eigen::MatrixXf C = MatrixXf::Zero(4, len_basic);
     for (unsigned int i = 0; i < T.size(); i++) {
         C += T[i]*Qis[i];
     }
     for (unsigned int j = 0; j < len_basic; j++) {
-        basicVertices[j] = Vertex(C(0,j), C(1,j), C(2,j));
+        controlVertices[j] = Vertex(C(0,j), C(1,j), C(2,j));
     }
     unsigned int n = coeffs.size();
     Vertex tmp;
     for(unsigned int i = 0; i < n; i++) {
         tmp = {0, 0, 0};
         for (auto const & it : coeffs[i]) {
-            tmp += it.second * basicVertices[it.first];
+            tmp += it.second * controlVertices[it.first];
         }
         vertices[i] = tmp;
     }

@@ -255,6 +255,8 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_3_0
         else if (event->key() == Qt::Key_R) {
             computedQi = false;
             mesh.reset();
+            gizmos.clear();
+            Mode = true;
             this->update();
         }
 
@@ -358,6 +360,8 @@ signals:
 
     public slots:
         void open_mesh() {
+            computedQi = false;
+            gizmos.clear();
             bool success = false;
             QString fileName = QFileDialog::getOpenFileName(NULL,"","");
             if ( !fileName.isNull() ) { // got a file name
@@ -372,8 +376,9 @@ signals:
                     success = OBJIO::openTriMesh(fileName.toStdString() , mesh.vertices , mesh.triangles );
                 }
                 if(success) {
-                    mesh.basicVertices = mesh.vertices;
+                    mesh.controlVertices = mesh.vertices;
                     mesh.resetVertices = mesh.vertices;
+                    mesh.vertices_no = mesh.vertices;
                     mesh.basicTriangles = mesh.triangles;
                     mesh.coeffs = std::vector<std::map< unsigned int, float > >(mesh.vertices.size());
                     mesh.colors = std::vector<float[3]> (mesh.vertices.size());
