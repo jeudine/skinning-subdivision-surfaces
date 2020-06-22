@@ -12,6 +12,14 @@ Please also install [eigen3](https://eigen.tuxfamily.org/index.php?title=Main_Pa
 
 Don't forget to build `libQGLViewer` in the extern directory.
 
+Run `qmake` and then `make` to build the program.
+
+Then use the following command to run our demonstrator:
+
+```bash
+./demonstrator
+```
+
 ## Basic Usage
 
 Press **h** to make the *help* window appear.

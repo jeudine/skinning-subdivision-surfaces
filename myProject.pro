@@ -1,5 +1,5 @@
 TEMPLATE = app
-TARGET = myProject
+TARGET = demonstrator
 DEPENDPATH += .
 INCLUDEPATH += .
 INCLUDEPATH += ./src
